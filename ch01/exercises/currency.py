@@ -4,4 +4,4 @@ amount = float(input("Please input the amount of currency that you would like to
 total = amount * exchange_rate
 result = total - 3
 
-print(result)
+print(f"Your total converted currency is: ${result}")
