@@ -1,12 +1,28 @@
 import target
 import turtle
 
+'''
+simulates a dart throwing game between two players
+@param 
+    pen: turtle.Turtle()
+        The pen used to place darts on the target 
+    sizes: int[]
+        screen width [0] and height [1] that is needed to shoot darts on the target accurately
+    rounds: int
+        the number of rounds the game will go on 
+    guess: int
+        the users' guess on which player will win 1 or 2
+@returns: int
+    0 if game is a tie
+    1 if player 1 (green) wins 
+    2 if player 2 (red) wins
+'''
 def simulate_game(pen, sizes, rounds, guess) -> int:
     player1_score = 0
     player2_score = 0
     score_writer = turtle.Turtle()
-    score_writer.speed(10)
     score_writer.color("white")
+    score_writer.speed(0)
 
     for i in range(rounds):
         if (target.shoot_dart(pen, sizes, "green")):
@@ -45,10 +61,19 @@ def simulate_game(pen, sizes, rounds, guess) -> int:
     score_writer.write("It was a tie!", align="center", font=('Arial', 22, 'normal'))
     return 0 # in case of tie
 
-def betting(window):
-    input = window.textinput("NIM", "Which player do you think will win? Green, or Red?").lower()
+'''
+Asks user which player they think will win 
+@param 
+    window: turtle.Screen()
+        The screen that will be called to prompt the user 
+@returns: int 
+    1 if user chose green 
+    2 if user chose red
+'''
+def betting(window) -> int:
+    input = window.textinput("Betting", "Which player do you think will win? Green, or Red?").lower()
     while ((input != "green") and (input != "red")):
-        input = window.textinput("NIM", "Sorry that wasn't a valid option. Please type either Green or Red.").lower()
+        input = window.textinput("Betting", "Sorry that wasn't a valid option. Please type either Green or Red.").lower()
 
     if (input == "green"):
         return 1

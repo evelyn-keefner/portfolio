@@ -55,7 +55,7 @@ returns whether or not a coordinate is within a circle based on the radius of th
     True if the cooridnate is on target 
     False if not
 '''
-def dart_on_target(x, y, radius):
+def dart_on_target(x, y, radius) -> bool:
     if (math.hypot(x, y) > radius):
         return False
     return True
