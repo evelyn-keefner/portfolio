@@ -45,14 +45,14 @@ def graph_coordinates(threenp1_iters_dict):
 
     graph = turtle.Turtle()
     graph.color("white")
-    graph.speed(10)
+    graph.speed(5)
     graph.penup()
     graph.goto(0, 0)
     graph.pendown()
 
     pen = turtle.Turtle()
     pen.color("white")
-    pen.speed(10)
+    pen.speed(5)
     pen.penup()
     pen.goto(0, 10)
 
@@ -70,6 +70,8 @@ def graph_coordinates(threenp1_iters_dict):
             pen.penup()
          
         graph.goto(k, v)
+
+    wn.exitonclick()
 
 def main():
     dict = threenp1range(10)
