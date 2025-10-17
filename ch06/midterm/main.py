@@ -10,8 +10,10 @@ draws a trunk
         width of trunk
 '''
 def draw_trunk(length, width) -> None:
+    TRUNK_COLOR = "brown"
+
     pen = turtle.Turtle()
-    pen.color("brown")
+    pen.color(TRUNK_COLOR)
     pen.left(90)
     pen.width(width)
     pen.forward(length)
@@ -27,12 +29,14 @@ draws a leaf
         y position for leaf
 '''
 def draw_leaf(x, y) -> None:
+    LEAF_COLOR = "green"
+
     pen = turtle.Turtle()
     pen.speed(10)
     pen.penup()
     pen.goto(x, y)
     pen.pendown()
-    pen.dot(random.randint(8, 16), "green")
+    pen.dot(random.randint(8, 16), LEAF_COLOR)
     pen.penup()
     pen.hideturtle()
     
@@ -61,16 +65,19 @@ recursively draws branches, decreasing length for each new branch off of an exis
         determines if degree_range will increase as branches get smaller
 '''
 def draw_branches(x, y, size, branch_frequency, size_decay, leaf_frequency, random_leaf_frequency, degree_range, degree_growth) -> None:
-    if (size < 10):
+    MINIMUM_BRANCH_SIZE = 10
+    
+    # End condition of size
+    if (size < MINIMUM_BRANCH_SIZE):
+        # Rolls to draw leaves on the end of branches that fall below minimum branch size
         leaf_chance = 100 * (random.random())
         if leaf_frequency >= leaf_chance:
             draw_leaf(x, y)
-        return None
+        return None 
     
+    # Calculates new values for next branch iteration
     step_size = int(size / 10)
-
-    new_size = size / size_decay
-
+    new_size = size / size_decay # Size decay must be above 1 in order to decrease size and fulfull the end condition
     new_degree_range = degree_range + degree_growth * random.random()
     
     # set up turtle
@@ -85,6 +92,7 @@ def draw_branches(x, y, size, branch_frequency, size_decay, leaf_frequency, rand
     pen.left(random.uniform(-degree_range, degree_range))
     pen.pendown()
     
+    # Breaks each movement into 10 steps, rolling random chances for branches and leaves to appear at each step
     for i in range(10):
         pen.forward(step_size)
         branch_chance = 100 * (random.random())
@@ -98,10 +106,11 @@ def draw_branches(x, y, size, branch_frequency, size_decay, leaf_frequency, rand
     pen.penup()
     pen.hideturtle()
     
+    # Calculates new values for next branch to begin, this cannot be done before the pen moves as these coordiinates are dependent on the random direction pen goes
     new_x: int = pen.xcor() 
     new_y: int = pen.ycor()
 
-   
+    # Creation of new branches at the end of the current branch
     for i in range(random.randint(2, int(branch_frequency))):
         draw_branches(new_x, new_y, new_size, branch_frequency, size_decay, leaf_frequency, random_leaf_frequency, new_degree_range, degree_growth)
     return None
@@ -147,7 +156,7 @@ Prompts user for a float value
     float value that the user types in
 '''
 def user_input(message) -> float:
-    user_input = ""
+    user_input = None
     print(message)
     while type(user_input) != type(1.0):
         try:
@@ -157,24 +166,40 @@ def user_input(message) -> float:
     return user_input
 
 def draw_background() -> None:
+    SUN_X_COORDINATE = -190
+    SUN_Y_COORDINATE = 190
+    SUN_SIZE = 50
+    SUN_COLOR = "yellow"
+    GROUND_WIDTH = 18
+    GROUND_COLOR = "palegreen4"
+    GROUND_LEFT_BOUND = -250
+    GROUND_RIGHT_BOUND = 250
     pen = turtle.Turtle()
+
     pen.speed(10)
     pen.penup()
-    pen.goto(-190, 190)
+    pen.goto(SUN_X_COORDINATE, SUN_Y_COORDINATE)
     pen.pendown()
-    pen.dot(50, "yellow")
-    pen.width(18)
+    pen.dot(SUN_SIZE, SUN_COLOR)
+    pen.width(GROUND_WIDTH)
     pen.penup()
-    pen.goto(-250, 0)
+    pen.goto(GROUND_LEFT_BOUND, 0)
     pen.pendown()
-    pen.color("palegreen4")
-    pen.goto(250, 0)
+    pen.color(GROUND_COLOR)
+    pen.goto(GROUND_RIGHT_BOUND, 0)
 
 def main() -> None:
     wn = turtle.Screen()
-    wn.setworldcoordinates(-250, 0, 250, 250)
-    wn.title("Random Tree")
-    wn.bgcolor("lightskyblue")
+    NEGATIVE_X_BOUND = -250
+    NEGATIVE_Y_BOUND = 0
+    POSITIVE_X_BOUND = 250
+    POSITIVE_Y_BOUND = 250
+    TITLE = "Random Tree"
+    BG_COLOR = "lightskyblue"
+
+    wn.setworldcoordinates(NEGATIVE_X_BOUND, NEGATIVE_Y_BOUND, POSITIVE_X_BOUND, POSITIVE_Y_BOUND)
+    wn.title(TITLE)
+    wn.bgcolor(BG_COLOR)
     draw_background()
     x = 0
     y = 0
