@@ -23,3 +23,16 @@ Tree Function
     When the branch gets small enough nearing the top of the tree, the leaf frequency will be used to determine whether or not leaves will be generated on it
     Leaves 
       Each branch of any size as it is being drawn has a chance to have leaves drawn along it
+
+
+
+
+
+draw branches worst case
+
+branch chance of 3
+12 times for every call
+after 4 iterations end condition is met
+
+)
+
