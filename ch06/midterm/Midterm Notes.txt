@@ -1,0 +1,38 @@
+**Changeable Parameters** 
+
+Initial Trunk Size
+  Self explanatory
+Branch Frequency
+  chance of more branches being generated than not
+Branch Size Decay
+  As each iteration goes through this determines how small they get. Branch width will be determined off of branch length using a set function
+Leaf Frequency
+  Chance of a leaf being generated on small branches
+Branch Leaf Frequency
+  Chance of a leaf being generated on a branch of any size
+Degree Range
+  The range of degrees that the next branch will be angled out
+Degree Growth Factor
+  Whether or not you want the range of the branches to increase as the interations progress
+
+
+Tree Function
+  Trunk Function
+  Branches
+    As the branch is being drawn, as each step advances there will be a chance for a smaller branch to be drawn off of it
+    When the branch gets small enough nearing the top of the tree, the leaf frequency will be used to determine whether or not leaves will be generated on it
+    Leaves 
+      Each branch of any size as it is being drawn has a chance to have leaves drawn along it
+
+
+
+
+
+draw branches worst case
+
+branch chance of 3
+12 times for every call
+after 4 iterations end condition is met
+
+)
+
