@@ -1,29 +1,35 @@
 import pygame
 
-# pygame setup
-pygame.init()
-# keeps window responsive
-pygame.event.pump()
-# init window to the default size, which is the size of the monitor
-screen = pygame.display.set_mode()
-clock = pygame.time.Clock()
-running = True
+def initialize_pygame():
+    pygame.init() 
+    pygame.event.pump() # keeps window responsive
 
-while running:
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+def run_game():
+    screen = pygame.display.set_mode() # sets window to default size of the monitor
+    clock = pygame.time.Clock()
+    running = True
 
-    # fill the screen with a color to wipe away anything from last frame
-    screen.fill("black")
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-    # RENDER YOUR GAME HERE
+        # fill the screen with a color to wipe away anything from last frame
+        screen.fill("black") 
 
-    # flip() the display to put your work on screen (switches to next image)
-    pygame.display.flip()
+        # RENDER GAME HERE
 
-    clock.tick(60)  # limits FPS to 60
+        # flip() the display to put work onto screen
+        pygame.display.flip()
 
-pygame.quit()
+        # limit fps to 60
+        clock.tick(60)
+
+    pygame.quit()
+
+def main():
+    initialize_pygame()
+    run_game()
+
+if __name__ == '__main__':
+    main()
