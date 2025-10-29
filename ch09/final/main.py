@@ -33,7 +33,7 @@ def run_game():
         camera_group.draw(screen) # draws every sprite within the camera_group to the screen
 
         # flip() the display to put work onto screen
-        pygame.display.flip()
+        pygame.display.update()
 
         # limit fps to 60
         clock.tick(60)
