@@ -1,6 +1,7 @@
 import pygame
 import sys
 import player
+import camera
 
 def initialize_pygame():
     GAME_TITLE = "The Great Emu War"
@@ -16,8 +17,8 @@ def run_game():
     x = int(window_x / 2)
     y = int(window_y / 2)
     pos = (x, y)
-
-    camera_group = pygame.sprite.Group() # sprite group to handle all sprites
+    
+    camera_group = camera.CameraGroup() # sprite group to handle all sprites
 
     main_player = player.Player(pos, camera_group)
 
