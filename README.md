@@ -4,4 +4,4 @@
 - Discord Username: hybyrn
 - Github Username: evelyn-keefner
 
-This is a portfolio of all projects done during my time in CS110 at Binghamton University. 
+This is a portfolio of all projects done during my time in CS110 at Binghamton University
