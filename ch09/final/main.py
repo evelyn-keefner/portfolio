@@ -19,7 +19,7 @@ def run_game():
     pos = (x, y)
     
     camera_group = camera.CameraGroup() # sprite group to handle all sprites
-
+    
     main_player = player.Player(pos, camera_group)
 
     while True:
@@ -31,9 +31,9 @@ def run_game():
         screen.fill("beige") # fills screen to a set background color
 
         camera_group.update() # calls update() on every sprite within the group
-        camera_group.draw(screen) # draws every sprite within the camera_group to the screen
+        camera_group.custom_draw(main_player) # draws every sprite within the camera_group to the screen
 
-        # flip() the display to put work onto screen
+        # update() the display to put work onto screen
         pygame.display.update()
 
         # limit fps to 60
