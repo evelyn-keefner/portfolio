@@ -1,6 +1,7 @@
 import pygame
 import sys
 import player
+import enemy
 import camera
 
 def initialize_pygame():
@@ -18,9 +19,16 @@ def run_game():
     y = int(window_y / 2)
     pos = (x, y)
     
-    camera_group = camera.CameraGroup() # sprite group to handle all sprites
+    camera_group = camera.CameraGroup() # sprite group to handle all sprites every sprite must be added into this group
+    player_group = pygame.sprite.Group()
+    enemy_group = pygame.sprite.Group()
     
     main_player = player.Player(pos, camera_group)
+    player_group.add(main_player)
+    
+    # REMOVE ME!
+    test_enemy = enemy.Enemy((0, 0), camera_group)
+    enemy_group.add(test_enemy)
 
     while True:
         for event in pygame.event.get():
@@ -29,9 +37,13 @@ def run_game():
                 sys.exit()
         
         screen.fill("beige") # fills screen to a set background color
-
-        camera_group.update() # calls update() on every sprite within the group
-        camera_group.custom_draw(main_player) # draws every sprite within the camera_group to the screen
+        
+        # update every group that contains a sprite
+        enemy_group.update(main_player)
+        player_group.update()
+        
+        # camera group contains all sprites, handles all drawing including the ground, enemies and player
+        camera_group.custom_draw(main_player) 
 
         # update() the display to put work onto screen
         pygame.display.update()
