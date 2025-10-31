@@ -26,7 +26,7 @@ def run_game():
     main_player = Player(pos, camera_group)
     player_group.add(main_player)
     
-    # REMOVE ME!
+    # REMOVE ME! KILL ME END MY SUFFERING
     test_enemy = Enemy((0, 0), camera_group)
     enemy_group.add(test_enemy)
 
