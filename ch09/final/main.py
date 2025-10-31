@@ -1,8 +1,8 @@
 import pygame
 import sys
-import player
-import enemy
-import camera
+from player import Player
+from enemy import Enemy
+from camera import CameraGroup
 
 def initialize_pygame():
     GAME_TITLE = "The Great Emu War"
@@ -19,15 +19,15 @@ def run_game():
     y = int(window_y / 2)
     pos = (x, y)
     
-    camera_group = camera.CameraGroup() # sprite group to handle all sprites every sprite must be added into this group
+    camera_group = CameraGroup() # sprite group to handle all sprites every sprite must be added into this group
     player_group = pygame.sprite.Group()
     enemy_group = pygame.sprite.Group()
     
-    main_player = player.Player(pos, camera_group)
+    main_player = Player(pos, camera_group)
     player_group.add(main_player)
     
     # REMOVE ME!
-    test_enemy = enemy.Enemy((0, 0), camera_group)
+    test_enemy = Enemy((0, 0), camera_group)
     enemy_group.add(test_enemy)
 
     while True:

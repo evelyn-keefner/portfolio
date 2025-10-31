@@ -36,7 +36,6 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
 
         if self.direction.magnitude() != 0: # magnitude is absolute length of the vector given x and y (a^2 + b^2 = c^2)
             self.direction = self.direction.normalize() # normalize sets the magnitude to 1, so if two directions are pressed, the vector will be normalized to 1 instead of sqrt(2) 
-            print(self.direction)
         self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
 
 def main():
