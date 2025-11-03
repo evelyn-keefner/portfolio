@@ -15,6 +15,9 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
         self.direction.x = (player_coords[0] - enemy_coords[0])
         self.direction.y = (player_coords[1] - enemy_coords[1])
 
+    '''
+    automatically called when the sprite group an enemy object belongs to has the .update() function called on it
+    '''
     def update(self, player):
         old_rect = self.rect.copy() # holds a copy of the current rect before movement, in case of a collision with another object
         self.player_direction(player)

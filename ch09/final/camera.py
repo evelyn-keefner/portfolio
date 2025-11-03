@@ -26,11 +26,11 @@ class CameraGroup(pygame.sprite.Group):
             if player.rect.colliderect(rect):
                 self.ground_rect = rect
                 return None
-
-    def custom_draw(self, player):
-        self.center_target_camera(player)
-
-        # ground
+ 
+    '''
+    Called in custom_draw to handle the drawing of the ground
+    '''
+    def draw_ground(self, player):
         ground_rects = []
         current_x = self.ground_rect.topleft[0]
         current_y = self.ground_rect.topleft[1]
@@ -54,6 +54,14 @@ class CameraGroup(pygame.sprite.Group):
 
         for ground_rect in ground_rects:
             self.display_surface.blit(self.ground_surf, ground_rect.topleft - self.offset)
+
+    '''
+    replaces the default .draw() function of a sprite in a sprite group
+    handles the drawing 
+    '''
+    def custom_draw(self, player):
+        self.center_target_camera(player)
+        self.draw_ground(player)
 
         # active elements
         for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):

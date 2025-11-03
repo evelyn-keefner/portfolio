@@ -9,6 +9,9 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.velocity = 5 # how fast character moves
         self.health = 20
     
+    ''' 
+    is called in the update() function to get player input before updating the player's direction vector
+    '''
     def input(self):
         keys = pygame.key.get_pressed()
 
@@ -25,7 +28,10 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
             self.direction.y = 1
         else:
             self.direction.y = 0
-
+    
+    '''
+    automatically called when the sprite group a player object is contained in has the .update() method called on it
+    '''
     def update(self):
         old_rect = self.rect.copy() # holds a copy of the current rect before movement, in case of a collision with another object
         self.input()
