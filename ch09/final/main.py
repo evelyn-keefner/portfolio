@@ -38,6 +38,8 @@ def run_game():
         
         screen.fill("beige") # fills screen to a set background color
         
+        # main_player.shoot()
+
         # update every group that contains a sprite
         enemy_group.update(main_player)
         player_group.update()

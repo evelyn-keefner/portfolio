@@ -23,7 +23,7 @@ class CameraGroup(pygame.sprite.Group):
 
     def player_in_relation_to_ground(self, player, rects):
         for rect in rects:
-            if player.get_rect().colliderect(rect):
+            if player.rect.colliderect(rect):
                 self.ground_rect = rect
                 return None
 

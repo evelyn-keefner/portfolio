@@ -9,21 +9,6 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.velocity = 5 # how fast character moves
         self.health = 20
     
-    def get_image(self):
-        return self.image
-
-    def get_rect(self):
-        return self.rect
-
-    def get_direction(self):
-        return self.direction
-
-    def get_velocity(self):
-        return self.velocity
-
-    def get_health(self):
-        return self.health
-
     def input(self):
         keys = pygame.key.get_pressed()
 
