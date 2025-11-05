@@ -1,8 +1,8 @@
 import pygame
 import sys
-from player import Player
-from enemy import Enemy
-from camera import CameraGroup
+from src.player import Player
+from src.enemy import Enemy
+from src.camera import CameraGroup
 
 def initialize_pygame():
     GAME_TITLE = "The Great Emu War"
