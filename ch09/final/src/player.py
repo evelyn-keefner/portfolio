@@ -3,7 +3,7 @@ import pygame
 class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be able to add it to a sprite group and use update() and draw()
     def __init__(self, pos, group):
         super().__init__(group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
-        self.image = pygame.image.load('assets/sprite/sprite_idle1.webp')
+        self.image = pygame.image.load('assets/sprite/sprite_run1.webp')
         w,h = self.image.get_size()
         self.image = pygame.transform.scale(self.image, (2*w,2*h))
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
