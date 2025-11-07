@@ -8,6 +8,7 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
         self.direction = pygame.math.Vector2()
         self.velocity = 2 # how fast character moves
         self.health = 20
+        self.damage = 1
    
     def player_direction(self, player):
         player_coords = player.rect.center 

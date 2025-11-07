@@ -8,6 +8,10 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.direction = pygame.math.Vector2()
         self.velocity = 5 # how fast character moves
         self.health = 20
+        self.invulnerable = False
+        self.invulnerable_time = 500 # invincibility time in milliseconds (0.5 seconds)
+        self.current_time = pygame.time.get_ticks()
+        self.damage_time = 0
     
     ''' 
     is called in the update() function to get player input before updating the player's direction vector
@@ -38,6 +42,17 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         if self.direction.magnitude() != 0: # magnitude is absolute length of the vector given x and y (a^2 + b^2 = c^2)
             self.direction = self.direction.normalize() # normalize sets the magnitude to 1, so if two directions are pressed, the vector will be normalized to 1 instead of sqrt(2) 
         self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
+        
+        self.current_time = pygame.time.get_ticks()
+        if (self.current_time - self.damage_time) > self.invulnerable_time:
+            self.invulnerable = False
+
+        contacted_enemies = pygame.sprite.spritecollide(self, enemy_group, False)
+        if contacted_enemies and not self.invulnerable:
+            self.health -= contacted_enemies[0].damage
+            self.damage_time = pygame.time.get_ticks()
+            self.invulnerable = True
+            print(self.health)
 
 def main():
     print("Wrong file: please run run python3 main.py")
