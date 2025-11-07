@@ -32,7 +32,7 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
     '''
     automatically called when the sprite group a player object is contained in has the .update() method called on it
     '''
-    def update(self):
+    def update(self, enemy_group):
         old_rect = self.rect.copy() # holds a copy of the current rect before movement, in case of a collision with another object
         self.input()
         if self.direction.magnitude() != 0: # magnitude is absolute length of the vector given x and y (a^2 + b^2 = c^2)

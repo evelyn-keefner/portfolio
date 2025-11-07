@@ -1,11 +1,10 @@
 import pygame
 
 class Button(pygame.sprite.Sprite): # class inherits from the sprite class to be able to add it to a sprite group and use update() and draw()
-    def __init__(self, pos, function, group):
+    def __init__(self, pos, group):
         super().__init__(group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
         self.image = pygame.image.load('assets/placeholder_assets/small_button.png')
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
-        self.function = function
         self.pressed = False
     
     def mouse_click(self) -> bool:
@@ -19,7 +18,6 @@ class Button(pygame.sprite.Sprite): # class inherits from the sprite class to be
                     pass
                 else:
                     print("test ok") 
-                    self.function()
                     self.pressed = True
             else:
                 self.pressed = False
