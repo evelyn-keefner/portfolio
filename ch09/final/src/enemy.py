@@ -3,7 +3,8 @@ import pygame
 class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be able to add it to a sprite group and use update() and draw()
     def __init__(self, pos, group):
         super().__init__(group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
-        self.image = pygame.image.load('assets/placeholder_assets/placeholder_enemy.png')
+        self.image = pygame.image.load('assets/sprite/enemy2_run1.webp')
+        self.image = self.image = pygame.transform.scale(self.image, (60,120))
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
         self.direction = pygame.math.Vector2()
         self.velocity = 2 # how fast character moves
@@ -26,6 +27,11 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
         if self.direction.magnitude() != 0: # magnitude is absolute length of the vector given x and y (a^2 + b^2 = c^2)
             self.direction = self.direction.normalize() # normalize sets the magnitude to 1, so if two directions are pressed, the vector will be normalized to 1 instead of sqrt(2) 
         self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
+
+        tick = pygame.time.get_ticks()
+        image = f'assets/sprite/enemy2_run{tick%4+1}.webp'
+        self.image = pygame.image.load(image)
+        self.image = pygame.transform.scale(self.image, (60,120))
 
 def main():
     print("Wrong file: please run run python3 main.py")
