@@ -1,18 +1,33 @@
 import pygame
+import math
 
 class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be able to add it to a sprite group and use update() and draw()
+<<<<<<< HEAD
     def __init__(self, pos, group):
         super().__init__(group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
         self.image = pygame.image.load('assets/sprite/sprite_run1.webp')
         self.image = pygame.transform.scale(self.image, (60,60))
+=======
+    def __init__(self, pos, camera_group, enemy_group, experience_group):
+        super().__init__(camera_group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
+        self.camera_group = camera_group
+        self.enemy_group = enemy_group
+        self.experience_group = experience_group
+        self.image = pygame.image.load('assets/placeholder_assets/placeholder_character.png')
+>>>>>>> 16ff248 (experience & player leveling)
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
         self.direction = pygame.math.Vector2()
         self.velocity = 5 # how fast character moves
         self.health = 20
+        self.xp = 0
+        self.level = 1
+        self.max_xp = self.max_xp_from_level(self.level)
         self.invulnerable = False
         self.invulnerable_time = 500 # invincibility time in milliseconds (0.5 seconds)
         self.current_time = pygame.time.get_ticks()
         self.damage_time = 0
+        self.selection_check = False
+        self.selection_queue = 0
     
     ''' 
     is called in the update() function to get player input before updating the player's direction vector
@@ -34,10 +49,16 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         else:
             self.direction.y = 0
     
+    def max_xp_from_level(self, level) -> int:
+        L = 100 
+        k = 0.1
+        o = 50
+        return int((L / (1 + math.exp(-k * (level - o)))) * 10)
+
     '''
     automatically called when the sprite group a player object is contained in has the .update() method called on it
     '''
-    def update(self, enemy_group):
+    def update(self):
         old_rect = self.rect.copy() # holds a copy of the current rect before movement, in case of a collision with another object
         keys = pygame.key.get_pressed() # for distinguishing run animation from idle animation
         self.input()
@@ -45,16 +66,38 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
             self.direction = self.direction.normalize() # normalize sets the magnitude to 1, so if two directions are pressed, the vector will be normalized to 1 instead of sqrt(2) 
         self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
         
+        # invulnerability frames
         self.current_time = pygame.time.get_ticks()
         if (self.current_time - self.damage_time) > self.invulnerable_time:
             self.invulnerable = False
-
-        contacted_enemies = pygame.sprite.spritecollide(self, enemy_group, False)
+        
+        # enemy collision to cause damage
+        contacted_enemies = pygame.sprite.spritecollide(self, self.enemy_group, False)
         if contacted_enemies and not self.invulnerable:
             self.health -= contacted_enemies[0].damage
             self.damage_time = pygame.time.get_ticks()
             self.invulnerable = True
-            print(self.health)
+            print(f'Player Health: {self.health}')
+        
+        if self.xp < self.max_xp:
+            self.selection_check = False
+        contacted_experience = pygame.sprite.spritecollide(self, self.experience_group, False)
+        if contacted_experience:
+            print(f'{self.xp} / {self.max_xp} Level: {self.level}')
+            self.xp += contacted_experience[0].value
+            print(f'{self.xp} / {self.max_xp} Level: {self.level}')
+            while self.xp >= self.max_xp:
+                self.xp -= self.max_xp
+                self.level += 1
+                self.max_xp = self.max_xp_from_level(self.level)
+                self.selection_check = True
+                self.selection_queue += 1
+                if self.xp < self.max_xp:
+                    self.xp = 0
+                print(f'{self.xp} / {self.max_xp} Level: {self.level}')
+            self.camera_group.remove(contacted_experience[0])
+            self.experience_group.remove(contacted_experience[0])
+
 
         if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]:
             tick = pygame.time.get_ticks()
