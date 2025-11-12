@@ -4,14 +4,11 @@ from src.experience import Experience
 class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be able to add it to a sprite group and use update() and draw()
     def __init__(self, pos, health, damage, experience, group, experience_group):
         super().__init__(group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
-<<<<<<< HEAD
         self.image = pygame.image.load('assets/sprite/enemy2_run1.webp')
         self.image = self.image = pygame.transform.scale(self.image, (60,120))
-=======
         self.camera_group = group
         self.experience_group = experience_group
         self.image = pygame.image.load('assets/placeholder_assets/placeholder_enemy.png')
->>>>>>> 16ff248 (experience & player leveling)
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
         self.direction = pygame.math.Vector2()
         self.velocity = 2 # how fast character moves
@@ -36,12 +33,10 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
             self.direction = self.direction.normalize() # normalize sets the magnitude to 1, so if two directions are pressed, the vector will be normalized to 1 instead of sqrt(2) 
         self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
 
-<<<<<<< HEAD
         tick = pygame.time.get_ticks()
         image = f'assets/sprite/enemy2_run{tick%4+1}.webp'
         self.image = pygame.image.load(image)
         self.image = pygame.transform.scale(self.image, (60,120))
-=======
         if self.health <= 0:
             xp = Experience(self.rect.center, self.camera_group, self.experience) # pos, group, value
             self.experience_group.add(xp)
@@ -49,7 +44,6 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
             for group in groups:
                 group.remove(self)
                 print('removed')
->>>>>>> 16ff248 (experience & player leveling)
 
 def main():
     print("Wrong file: please run run python3 main.py")

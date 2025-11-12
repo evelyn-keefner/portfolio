@@ -2,19 +2,16 @@ import pygame
 import math
 
 class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be able to add it to a sprite group and use update() and draw()
-<<<<<<< HEAD
     def __init__(self, pos, group):
         super().__init__(group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
         self.image = pygame.image.load('assets/sprite/sprite_run1.webp')
         self.image = pygame.transform.scale(self.image, (60,60))
-=======
     def __init__(self, pos, camera_group, enemy_group, experience_group):
         super().__init__(camera_group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
         self.camera_group = camera_group
         self.enemy_group = enemy_group
         self.experience_group = experience_group
         self.image = pygame.image.load('assets/placeholder_assets/placeholder_character.png')
->>>>>>> 16ff248 (experience & player leveling)
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
         self.direction = pygame.math.Vector2()
         self.velocity = 5 # how fast character moves
