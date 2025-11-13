@@ -76,7 +76,6 @@ def run_game():
                 if main_player.selection_check:
                     state = 'SELECTION'
             elif state == 'SELECTION': # in powerup selection screen
-                # handles drawing and updating
                 camera_group.custom_draw(main_player) # draw background before drawing buttons
                 selection_button_group.update()
                 for selection_button in selection_button_group.sprites():
