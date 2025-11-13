@@ -14,6 +14,9 @@ class Game:
         self.screen = pygame.display.set_mode()
         self.clock = pygame.time.Clock()
         self.game_time = 600000
+        self.current_time = 0
+        self.timer_time = 0
+        self.time_update_check = True 
         self.font = pygame.font.SysFont('arial', 36)
         self.window_x, self.window_y = self.screen.get_size()
         self.x = int(self.window_x / 2)
@@ -67,16 +70,21 @@ class Game:
                     self.player_group.update()
                     self.camera_group.custom_draw(self.main_player) 
                      
-                    
-                    current_time = pygame.time.get_ticks()
-                    
-
-                    timer_text = self.font.render(str(current_time), True, (255,255,24))
+                    self.current_time = pygame.time.get_ticks()
+                    if self.current_time - self.timer_time >= 100:
+                        self.time_update_check = True
+                        self.game_time -= 100
+                    if self.time_update_check:
+                        self.timer_time = pygame.time.get_ticks()
+                        self.time_update_check = False
+                    timer_text = self.font.render(str(self.game_time / 1000), True, (0, 0, 0))
                     self.screen.blit(timer_text,(100,100))
-
                     
                     if self.main_player.selection_check:
                         self.state = 'SELECTION'
+
+                    test_enemy.health -= 1
+
                 elif self.state == 'SELECTION': # in powerup selection screen
                     self.camera_group.custom_draw(self.main_player) # draw background before drawing buttons
                     self.selection_button_group.update()
