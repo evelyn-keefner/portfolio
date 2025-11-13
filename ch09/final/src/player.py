@@ -9,7 +9,15 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.camera_group = camera_group
         self.enemy_group = enemy_group
         self.experience_group = experience_group
-        self.image = pygame.image.load('assets/placeholder_assets/placeholder_character.png')
+        self.player_sprite_run = []
+        self.player_sprite_idle = []
+        self.frame_speed = 150 # milliseconds per frame
+        self.frame_current = 0
+        self.frame_next = False
+        self.frame_num = 0
+        for i in range(4):
+            self.player_sprite_idle.append(pygame.image.load(f'assets/sprite/sprite_idle{i+1}.webp'))
+            self.player_sprite_run.append(pygame.image.load(f'assets/sprite/sprite_run{i+1}.webp'))
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
         self.direction = pygame.math.Vector2()
         self.velocity = 5 # how fast character moves
@@ -93,19 +101,23 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
             self.camera_group.remove(contacted_experience[0])
             self.experience_group.remove(contacted_experience[0])
 
-
-        if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]:
-            tick = pygame.time.get_ticks()
-            image = f'assets/sprite/sprite_run{tick%4+1}.webp'
-            self.image = pygame.image.load(image)
-            self.image = pygame.transform.scale(self.image, (60,60))
-            if self.direction.x < 0:
-                self.image = pygame.transform.flip(self.image, True, False)
-        else:
-            tick = pygame.time.get_ticks()
-            image = f'assets/sprite/sprite_idle{tick%4+1}.webp'
-            self.image = pygame.image.load(image)
-            self.image = pygame.transform.scale(self.image, (60,60))
+        # animation handling
+        if (self.current_time - self.frame_current) > self.frame_speed:
+            self.frame_next = False
+            self.frame_num += 1
+            if self.frame_num > 3:
+                self.frame_num = 0
+        if self.frame_next == False:
+            self.frame_next = True
+            self.frame_current = pygame.time.get_ticks()
+            if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d]:
+                self.image = self.player_sprite_run[self.frame_num]
+                self.image = pygame.transform.scale(self.image, (60,60))
+                if self.direction.x < 0:
+                    self.image = pygame.transform.flip(self.image, True, False)
+            else:
+                self.image = self.player_sprite_idle[self.frame_num]
+                self.image = pygame.transform.scale(self.image, (60,60))
 
 
 def main():
