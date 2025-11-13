@@ -5,7 +5,7 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
     def __init__(self, pos, health, damage, experience, group, experience_group):
         super().__init__(group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
         self.image = pygame.image.load('assets/sprite/enemy2_run1.webp')
-        self.image = self.image = pygame.transform.scale(self.image, (60,120))
+        self.image = pygame.transform.scale(self.image, (60,120))        
         self.camera_group = group
         self.experience_group = experience_group
         self.enemy_run = []
@@ -41,6 +41,7 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
         self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
 
         # animation handling
+        self.current_time = pygame.time.get_ticks()
         if (self.current_time - self.frame_current) > self.frame_speed:
             self.frame_next = False
             self.frame_num += 1
@@ -49,9 +50,10 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
         if self.frame_next == False:
             self.frame_next = True
             self.frame_current = pygame.time.get_ticks()
-
             self.image = self.enemy_run[self.frame_num]
             self.image = pygame.transform.scale(self.image, (60,120))
+            if self.direction.x < 0:
+                self.image = pygame.transform.flip(self.image, True, False)
 
         if self.health <= 0:
             xp = Experience(self.rect.center, self.camera_group, self.experience) # pos, group, value
@@ -61,8 +63,6 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
                 group.remove(self)
                 print('removed')
 
-        if self.direction.x < 0:
-            self.image = pygame.transform.flip(self.image, True, False)
 
 def main():
     print("Wrong file: please run run python3 main.py")
