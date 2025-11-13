@@ -45,6 +45,9 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
                 group.remove(self)
                 print('removed')
 
+        if self.direction.x < 0:
+            self.image = pygame.transform.flip(self.image, True, False)
+
 def main():
     print("Wrong file: please run run python3 main.py")
 
