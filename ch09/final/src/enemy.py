@@ -8,7 +8,14 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
         self.image = self.image = pygame.transform.scale(self.image, (60,120))
         self.camera_group = group
         self.experience_group = experience_group
-        self.image = pygame.image.load('assets/placeholder_assets/placeholder_enemy.png')
+        self.enemy_run = []
+        self.frame_speed = 150 # milliseconds per frame
+        self.frame_current = 0
+        self.frame_next = False
+        self.current_time = pygame.time.get_ticks()
+        self.frame_num = 0
+        for i in range(4):
+            self.enemy_run.append(pygame.image.load(f'assets/sprite/enemy2_run{i+1}.webp'))
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
         self.direction = pygame.math.Vector2()
         self.velocity = 2 # how fast character moves
@@ -33,10 +40,19 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
             self.direction = self.direction.normalize() # normalize sets the magnitude to 1, so if two directions are pressed, the vector will be normalized to 1 instead of sqrt(2) 
         self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
 
-        tick = pygame.time.get_ticks()
-        image = f'assets/sprite/enemy2_run{tick%4+1}.webp'
-        self.image = pygame.image.load(image)
-        self.image = pygame.transform.scale(self.image, (60,120))
+        # animation handling
+        if (self.current_time - self.frame_current) > self.frame_speed:
+            self.frame_next = False
+            self.frame_num += 1
+            if self.frame_num > 3:
+                self.frame_num = 0
+        if self.frame_next == False:
+            self.frame_next = True
+            self.frame_current = pygame.time.get_ticks()
+
+            self.image = self.enemy_run[self.frame_num]
+            self.image = pygame.transform.scale(self.image, (60,120))
+
         if self.health <= 0:
             xp = Experience(self.rect.center, self.camera_group, self.experience) # pos, group, value
             self.experience_group.add(xp)
