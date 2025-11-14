@@ -1,6 +1,5 @@
 from stringutility import StringUtility
 
-
 def main():
     # create a list of StringUtility objects to use for testing
     test_strings = [
