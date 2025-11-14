@@ -46,11 +46,11 @@ class Game:
         self.enemy_group.add(test_enemy)
     
         start_button = Button(self.pos, self.menu_button_group, 'assets/assets_ui/start_button.webp', '')
-        selection_button1 = Button((100, 100), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
-        selection_button2 = Button((200, 200), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
-        selection_button3 = Button((300, 300), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
-        
-        
+        selection_button1 = Button((self.window_x/2, self.window_y/2+75), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
+        selection_button2 = Button((self.window_x/2, self.window_y/2), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
+        selection_button3 = Button((self.window_x/2, self.window_y/2-125), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
+
+
         timer_text = self.font.render("hello, gamers!", True, (255,255,225))
 
         while True:
