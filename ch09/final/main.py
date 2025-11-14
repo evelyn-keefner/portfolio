@@ -20,9 +20,9 @@ class Game:
         self.time_update_check = True 
         self.font = pygame.font.SysFont('arial', 36)
         self.window_x, self.window_y = self.screen.get_size()
-        self.x = int(self.window_x / 2)
-        self.y = int(self.window_y / 2)
-        self.pos = (self.x, self.y)
+        self.center_x = int(self.window_x / 2)
+        self.center_y = int(self.window_y / 2)
+        self.center_pos = (self.center_x, self.center_y)
         self.camera_group = CameraGroup()
         self.player_group = pygame.sprite.Group()
         self.enemy_group = pygame.sprite.Group()
@@ -34,7 +34,7 @@ class Game:
         self.pbi_h, self.pbi_w = self.powerup_background_image.get_size()
         self.powerup_background_image = pygame.transform.scale(self.powerup_background_image, (self.pbi_h * 2, self.pbi_w * 2))
 
-        self.main_player = Player(self.pos, self.camera_group, self.enemy_group, self.experience_group)
+        self.main_player = Player(self.center_pos, self.camera_group, self.enemy_group, self.experience_group)
 
         self.selection_queue = 0
 
@@ -49,7 +49,6 @@ class Game:
         selection_button1 = Button((self.window_x/2, self.window_y/2+75), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
         selection_button2 = Button((self.window_x/2, self.window_y/2), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
         selection_button3 = Button((self.window_x/2, self.window_y/2-125), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
-
 
         timer_text = self.font.render("hello, gamers!", True, (255,255,225))
 
@@ -92,7 +91,7 @@ class Game:
 
                 elif self.state == 'SELECTION': # in powerup selection screen
                     self.camera_group.custom_draw(self.main_player) # draw background before drawing buttons
-                    self.screen.blit(self.powerup_background_image, self.powerup_background_image.get_rect(center = self.pos))
+                    self.screen.blit(self.powerup_background_image, self.powerup_background_image.get_rect(center = self.center_pos))
                     self.selection_button_group.update() # updates and draws buttons
                     for selection_button in self.selection_button_group.sprites():
                         if selection_button.pressed == True:
