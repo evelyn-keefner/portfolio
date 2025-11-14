@@ -1,5 +1,6 @@
 import pygame
 import math
+from src.bullet import Bullet
 
 class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be able to add it to a sprite group and use update() and draw()
     def __init__(self, pos, camera_group, enemy_group, experience_group):

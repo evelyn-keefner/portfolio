@@ -6,6 +6,7 @@ from src.enemy import Enemy
 from src.camera import CameraGroup
 from src.button import Button
 from src.experience import Experience
+from src.bullet import Bullet
 
 class Game:
     
@@ -29,6 +30,9 @@ class Game:
         self.selection_button_group = pygame.sprite.Group()
         self.experience_group = pygame.sprite.Group()
 
+        self.powerup_background_image = pygame.image.load("assets/assets_ui/upgrade_ui.webp")
+        self.pbi_h, self.pbi_w = self.powerup_background_image.get_size()
+        self.powerup_background_image = pygame.transform.scale(self.powerup_background_image, (self.pbi_h * 2, self.pbi_w * 2))
 
         self.main_player = Player(self.pos, self.camera_group, self.enemy_group, self.experience_group)
 
@@ -41,7 +45,7 @@ class Game:
         test_enemy = Enemy((0, 0), 20, 1, 700, self.camera_group, self.experience_group)
         self.enemy_group.add(test_enemy)
     
-        start_button = Button(self.pos, self.menu_button_group, 'assets/placeholder_assets/small_button.png', 'START')
+        start_button = Button(self.pos, self.menu_button_group, 'assets/assets_ui/start_button.webp', '')
         selection_button1 = Button((100, 100), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
         selection_button2 = Button((200, 200), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
         selection_button3 = Button((300, 300), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
@@ -69,7 +73,8 @@ class Game:
                     self.enemy_group.update(self.main_player)
                     self.player_group.update()
                     self.camera_group.custom_draw(self.main_player) 
-                     
+                    
+                    # timer 
                     self.current_time = pygame.time.get_ticks()
                     if self.current_time - self.timer_time >= 100:
                         self.time_update_check = True
@@ -80,14 +85,15 @@ class Game:
                     timer_text = self.font.render(str(self.game_time / 1000), True, (0, 0, 0))
                     self.screen.blit(timer_text,(100,100))
                     
+                    test_enemy.health -= 1
+
                     if self.main_player.selection_check:
                         self.state = 'SELECTION'
 
-                    test_enemy.health -= 1
-
                 elif self.state == 'SELECTION': # in powerup selection screen
                     self.camera_group.custom_draw(self.main_player) # draw background before drawing buttons
-                    self.selection_button_group.update()
+                    self.screen.blit(self.powerup_background_image, self.powerup_background_image.get_rect(center = self.pos))
+                    self.selection_button_group.update() # updates and draws buttons
                     for selection_button in self.selection_button_group.sprites():
                         if selection_button.pressed == True:
                             if selection_button.text == 'example powerup':
