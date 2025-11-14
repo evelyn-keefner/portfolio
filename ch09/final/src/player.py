@@ -7,9 +7,14 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         super().__init__(camera_group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
         self.image = pygame.image.load('assets/sprite/sprite_run1.webp')
         self.image = pygame.transform.scale(self.image, (60,60))
+        self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
+        
+        # groups
         self.camera_group = camera_group
         self.enemy_group = enemy_group
         self.experience_group = experience_group
+
+        # animation
         self.player_sprite_run = []
         self.player_sprite_idle = []
         self.frame_speed = 150 # milliseconds per frame
@@ -19,20 +24,47 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         for i in range(4):
             self.player_sprite_idle.append(pygame.image.load(f'assets/sprite/sprite_idle{i+1}.webp'))
             self.player_sprite_run.append(pygame.image.load(f'assets/sprite/sprite_run{i+1}.webp'))
-        self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
+
+        # movement
         self.direction = pygame.math.Vector2()
         self.velocity = 5 # how fast character moves
-        self.health = 20
+        
+        # leveling
         self.xp = 0
         self.level = 1
         self.max_xp = self.max_xp_from_level(self.level)
-        self.invulnerable = False
-        self.invulnerable_time = 500 # invincibility time in milliseconds (0.5 seconds)
-        self.current_time = pygame.time.get_ticks()
-        self.damage_time = 0
         self.selection_check = False
         self.selection_queue = 0
-    
+
+        
+        # current time needed for many checks
+        self.current_time = pygame.time.get_ticks()
+
+        # damage & health
+        self.health = 20
+        self.invulnerable = False
+        self.invulnerable_time = 500 # invincibility time in milliseconds (0.5 seconds)
+        self.damage_time = 0
+
+        # gun and bullets
+        self.fire_delay = 500 # 0.5 seconds in milliseconds
+        self.fire_check = False
+        self.fire_time = 0 # time since last bullet fired
+        
+    def max_xp_from_level(self, level) -> int:
+        L = 100 
+        k = 0.1
+        o = 50
+        return int((L / (1 + math.exp(-k * (level - o)))) * 10)
+
+    def enemy_vector_normalized(self, enemy):
+        enemy_vector_normalized = pygame.math.Vector2()
+        player_coords = self.rect.center 
+        enemy_coords = enemy.rect.center
+        enemy_vector_normalized.x = (player_coords[0] - enemy_coords[0])
+        enemy_vector_normalized.y = (player_coords[1] - enemy_coords[1])
+        return enemy_vector_normalized.normalize()
+
     ''' 
     is called in the update() function to get player input before updating the player's direction vector
     '''
@@ -53,22 +85,16 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         else:
             self.direction.y = 0
     
-    def max_xp_from_level(self, level) -> int:
-        L = 100 
-        k = 0.1
-        o = 50
-        return int((L / (1 + math.exp(-k * (level - o)))) * 10)
-
     '''
     automatically called when the sprite group a player object is contained in has the .update() method called on it
     '''
     def update(self):
-        old_rect = self.rect.copy() # holds a copy of the current rect before movement, in case of a collision with another object
+        # movement 
         keys = pygame.key.get_pressed() # for distinguishing run animation from idle animation
         self.input()
-        if self.direction.magnitude() != 0: # magnitude is absolute length of the vector given x and y (a^2 + b^2 = c^2)
-            self.direction = self.direction.normalize() # normalize sets the magnitude to 1, so if two directions are pressed, the vector will be normalized to 1 instead of sqrt(2) 
-        self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
+        if self.direction.magnitude() != 0: 
+            self.direction = self.direction.normalize() 
+            self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
         
         # invulnerability frames
         self.current_time = pygame.time.get_ticks()
@@ -82,7 +108,11 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
             self.damage_time = pygame.time.get_ticks()
             self.invulnerable = True
             print(f'Player Health: {self.health}')
+
+        # firing gun
         
+
+        # experience and leveling
         if self.xp < self.max_xp:
             self.selection_check = False
         contacted_experience = pygame.sprite.spritecollide(self, self.experience_group, False)
@@ -119,7 +149,6 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
             else:
                 self.image = self.player_sprite_idle[self.frame_num]
                 self.image = pygame.transform.scale(self.image, (60,60))
-
 
 def main():
     print("Wrong file: please run run python3 main.py")
