@@ -7,6 +7,109 @@ from src.camera import CameraGroup
 from src.button import Button
 from src.experience import Experience
 
+class Game:
+    
+    def __init__(self):
+        self.state = 'START'
+        self.screen = pygame.display.set_mode()
+        self.clock = pygame.time.Clock()
+        self.game_time = 600000
+        self.current_time = 0
+        self.timer_time = 0
+        self.time_update_check = True 
+        self.font = pygame.font.SysFont('arial', 36)
+        self.window_x, self.window_y = self.screen.get_size()
+        self.x = int(self.window_x / 2)
+        self.y = int(self.window_y / 2)
+        self.pos = (self.x, self.y)
+        self.camera_group = CameraGroup()
+        self.player_group = pygame.sprite.Group()
+        self.enemy_group = pygame.sprite.Group()
+        self.menu_button_group = pygame.sprite.Group()
+        self.selection_button_group = pygame.sprite.Group()
+        self.experience_group = pygame.sprite.Group()
+
+
+        self.main_player = Player(self.pos, self.camera_group, self.enemy_group, self.experience_group)
+
+        self.selection_queue = 0
+
+    def run_game(self):
+        self.player_group.add(self.main_player)
+    
+        # Enemy(pos, health, damage, experience, group, experience_group)
+        test_enemy = Enemy((0, 0), 20, 1, 700, self.camera_group, self.experience_group)
+        self.enemy_group.add(test_enemy)
+    
+        start_button = Button(self.pos, self.menu_button_group, 'assets/placeholder_assets/small_button.png', 'START')
+        selection_button1 = Button((100, 100), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
+        selection_button2 = Button((200, 200), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
+        selection_button3 = Button((300, 300), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
+        
+        
+        timer_text = self.font.render("hello, gamers!", True, (255,255,225))
+
+        while True:
+            for event in pygame.event.get():
+                if (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            self.screen.fill("beige") # fills screen to a set background color
+        
+            if self.state == 'START':
+                # any buttons don't need to be drawn, update() also handles drawing
+                self.menu_button_group.update()
+                if start_button.pressed:
+                    self.state = 'RUNNING'
+
+            elif self.state == 'RUNNING' or self.state == 'SELECTION':
+                if self.state != 'SELECTION': # main game loop
+                    # update every group that contains a sprite
+                    self.enemy_group.update(self.main_player)
+                    self.player_group.update()
+                    self.camera_group.custom_draw(self.main_player) 
+                     
+                    self.current_time = pygame.time.get_ticks()
+                    if self.current_time - self.timer_time >= 100:
+                        self.time_update_check = True
+                        self.game_time -= 100
+                    if self.time_update_check:
+                        self.timer_time = pygame.time.get_ticks()
+                        self.time_update_check = False
+                    timer_text = self.font.render(str(self.game_time / 1000), True, (0, 0, 0))
+                    self.screen.blit(timer_text,(100,100))
+                    
+                    if self.main_player.selection_check:
+                        self.state = 'SELECTION'
+
+                    test_enemy.health -= 1
+
+                elif self.state == 'SELECTION': # in powerup selection screen
+                    self.camera_group.custom_draw(self.main_player) # draw background before drawing buttons
+                    self.selection_button_group.update()
+                    for selection_button in self.selection_button_group.sprites():
+                        if selection_button.pressed == True:
+                            if selection_button.text == 'example powerup':
+                                print("do thing")
+                            elif selection_button.text == 'other powerup':
+                                print("do other thing")
+                            else:
+                                print("powerup not given, error")
+                                if self.main_player.selection_queue > 0:
+                                    self.main_player.selection_queue -= 1 
+                                    self.state = 'SELECTION'
+                                    print("again")
+                                else:
+                                    self.state = 'RUNNING'
+        
+            pygame.display.update()
+
+            # limit fps to 60
+            self.clock.tick(60)
+
+        pygame.quit()
+
 def initialize_pygame():
     GAME_TITLE = "The Great Emu War"
     pygame.init() 
@@ -14,95 +117,10 @@ def initialize_pygame():
     pygame.event.pump() # keeps window responsive
     pygame.display.set_caption(GAME_TITLE)
 
-def running_status():
-    return 'RUNNING'
-    print('running test ok')
-
-def run_game():
-    screen = pygame.display.set_mode() # sets window to default size of the monitor
-    clock = pygame.time.Clock()
-    font = pygame.font.SysFont('arial', 36)
-    state = 'START'
-
-    window_x, window_y = screen.get_size()
-    x = int(window_x / 2)
-    y = int(window_y / 2)
-    pos = (x, y)
-    
-    camera_group = CameraGroup() # sprite group to handle all sprites every sprite must be added into this group
-    player_group = pygame.sprite.Group()
-    enemy_group = pygame.sprite.Group()
-    menu_button_group = pygame.sprite.Group()
-    selection_button_group = pygame.sprite.Group()
-    experience_group = pygame.sprite.Group()
-    
-    main_player = Player(pos, camera_group, enemy_group, experience_group)
-    player_group.add(main_player)
-    
-    # REMOVE ME! KILL ME END MY SUFFERING
-    # Enemy(pos, health, damage, experience, group, experience_group)
-    test_enemy = Enemy((0, 0), 20, 1, 700, camera_group, experience_group)
-    enemy_group.add(test_enemy)
-    
-    start_button = Button(pos, menu_button_group, 'assets/placeholder_assets/small_button.png', 'START')
-    selection_button1 = Button((100, 100), selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
-    selection_button2 = Button((200, 200), selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
-    selection_button3 = Button((300, 300), selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
-    
-    selection_queue = 0
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-        
-        screen.fill("beige") # fills screen to a set background color
-        
-        if state == 'START':
-            # any buttons don't need to be drawn, update() also handles drawing
-            menu_button_group.update()
-            if start_button.pressed:
-                state = 'RUNNING'
-
-        elif state == 'RUNNING' or state == 'SELECTION':
-            if state != 'SELECTION': # main game loop
-                # update every group that contains a sprite
-                enemy_group.update(main_player)
-                player_group.update()
-                camera_group.custom_draw(main_player) 
-                test_enemy.health -= 1 # remove me
-
-                if main_player.selection_check:
-                    state = 'SELECTION'
-            elif state == 'SELECTION': # in powerup selection screen
-                camera_group.custom_draw(main_player) # draw background before drawing buttons
-                selection_button_group.update()
-                for selection_button in selection_button_group.sprites():
-                    if selection_button.pressed == True:
-                        if selection_button.text == 'example powerup':
-                            print("do thing")
-                        elif selection_button.text == 'other powerup':
-                            print("do other thing")
-                        else:
-                            print("powerup not given, error")
-                            if main_player.selection_queue > 0:
-                                main_player.selection_queue -= 1 
-                                state = 'SELECTION'
-                                print("again")
-                            else:
-                                state = 'RUNNING'
-        
-        pygame.display.update()
-
-        # limit fps to 60
-        clock.tick(60)
-
-    pygame.quit()
-
 def main():
     initialize_pygame()
-    run_game()
+    game = Game()
+    game.run_game() 
 
 if __name__ == '__main__':
     main()
