@@ -3,7 +3,7 @@ import math
 from src.bullet import Bullet
 
 class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be able to add it to a sprite group and use update() and draw()
-    def __init__(self, pos, camera_group, enemy_group, experience_group):
+    def __init__(self, pos, camera_group, enemy_group, experience_group, bullet_group):
         super().__init__(camera_group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
         self.image = pygame.image.load('assets/sprite/sprite_run1.webp')
         self.image = pygame.transform.scale(self.image, (60,60))
@@ -13,6 +13,7 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.camera_group = camera_group
         self.enemy_group = enemy_group
         self.experience_group = experience_group
+        self.bullet_group = bullet_group
 
         # animation
         self.player_sprite_run = []
@@ -50,6 +51,7 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.fire_delay = 500 # 0.5 seconds in milliseconds
         self.fire_check = False
         self.fire_time = 0 # time since last bullet fired
+        self.bullet_damage = 5 
         
     def max_xp_from_level(self, level) -> int:
         L = 100 
@@ -57,12 +59,15 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         o = 50
         return int((L / (1 + math.exp(-k * (level - o)))) * 10)
 
+    def find_nearest_enemy(self, enemy_list):
+        return min(enemy_list, key=lambda enemy: pygame.math.Vector2(self.rect.x, self.rect.y).distance_to(enemy.rect.center)) if enemy_list else False
+
     def enemy_vector_normalized(self, enemy):
         enemy_vector_normalized = pygame.math.Vector2()
         player_coords = self.rect.center 
         enemy_coords = enemy.rect.center
-        enemy_vector_normalized.x = (player_coords[0] - enemy_coords[0])
-        enemy_vector_normalized.y = (player_coords[1] - enemy_coords[1])
+        enemy_vector_normalized.x = (enemy_coords[0] - player_coords[0])
+        enemy_vector_normalized.y = (enemy_coords[1] - player_coords[1])
         return enemy_vector_normalized.normalize()
 
     ''' 
@@ -110,7 +115,16 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
             print(f'Player Health: {self.health}')
 
         # firing gun
-        
+        if (self.current_time - self.fire_time) > self.fire_delay:
+            self.fire_check = True
+        if (self.fire_check):
+            self.fire_check = False
+            self.fire_time = pygame.time.get_ticks()
+            # fire gun
+            if self.enemy_group.sprites():
+                nearest_enemy = self.find_nearest_enemy(self.enemy_group.sprites())
+                if nearest_enemy:
+                    bullet = Bullet(self.rect.center, self.enemy_vector_normalized(nearest_enemy), self.bullet_damage, self.camera_group, self.bullet_group, self.enemy_group)
 
         # experience and leveling
         if self.xp < self.max_xp:
@@ -129,8 +143,7 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
                 if self.xp < self.max_xp:
                     self.xp = 0
                 print(f'{self.xp} / {self.max_xp} Level: {self.level}')
-            self.camera_group.remove(contacted_experience[0])
-            self.experience_group.remove(contacted_experience[0])
+            contacted_experience[0].kill()
 
         # animation handling
         if (self.current_time - self.frame_current) > self.frame_speed:

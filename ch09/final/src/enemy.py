@@ -58,11 +58,8 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
         if self.health <= 0:
             xp = Experience(self.rect.center, self.camera_group, self.experience) # pos, group, value
             self.experience_group.add(xp)
-            groups = self.groups()
-            for group in groups:
-                group.remove(self)
-                print('removed')
-
+            print("enemy_killed")
+            self.kill()
 
 def main():
     print("Wrong file: please run run python3 main.py")

@@ -29,12 +29,13 @@ class Game:
         self.menu_button_group = pygame.sprite.Group()
         self.selection_button_group = pygame.sprite.Group()
         self.experience_group = pygame.sprite.Group()
+        self.bullet_group = pygame.sprite.Group()
 
         self.powerup_background_image = pygame.image.load("assets/assets_ui/upgrade_ui.webp")
         self.pbi_h, self.pbi_w = self.powerup_background_image.get_size()
         self.powerup_background_image = pygame.transform.scale(self.powerup_background_image, (self.pbi_h * 2, self.pbi_w * 2))
 
-        self.main_player = Player(self.center_pos, self.camera_group, self.enemy_group, self.experience_group)
+        self.main_player = Player(self.center_pos, self.camera_group, self.enemy_group, self.experience_group, self.bullet_group)
 
         self.selection_queue = 0
 
@@ -71,6 +72,7 @@ class Game:
                     # update every group that contains a sprite
                     self.enemy_group.update(self.main_player)
                     self.player_group.update()
+                    self.bullet_group.update()
                     self.camera_group.custom_draw(self.main_player) 
                     
                     # timer 
@@ -84,7 +86,7 @@ class Game:
                     timer_text = self.font.render(str(self.game_time / 1000), True, (0, 0, 0))
                     self.screen.blit(timer_text,(100,100))
                     
-                    test_enemy.health -= 1
+                    # test_enemy.health -= 1
 
                     if self.main_player.selection_check:
                         self.state = 'SELECTION'
@@ -107,6 +109,11 @@ class Game:
                                     print("again")
                                 else:
                                     self.state = 'RUNNING'
+                elif self.state == 'BAD_END':
+                    self.camera_group.custom_draw(self.main_player)
+
+                elif self.state == 'GOOD_END':
+                    self.camera_group.custom_draw(self.main_player)
         
             pygame.display.update()
 
