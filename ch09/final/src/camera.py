@@ -11,8 +11,9 @@ class CameraGroup(pygame.sprite.Group):
         self.half_h = self.display_surface.get_size()[1] // 2 
 
         # ground
-        self.ground_surf = pygame.image.load('assets/assets_ui/background.webp')
-        self.ground_surf = pygame.transform.scale(self.ground_surf, (1972, 1972))
+        self.ground_surf = pygame.image.load('assets/assets_ui/test_background_delete_later.webp')
+        w,h = self.ground_surf.get_size()
+        self.ground_surf = pygame.transform.scale(self.ground_surf, (2*w,2*h))
         self.ground_width = self.ground_surf.get_width() 
         self.ground_height = self.ground_surf.get_height()
 
