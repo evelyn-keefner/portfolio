@@ -1,12 +1,14 @@
 import pygame
 import sys
 import time
+import random
 from src.player import Player
 from src.enemy import Enemy
 from src.camera import CameraGroup
 from src.button import Button
 from src.experience import Experience
 from src.bullet import Bullet
+from src.powerup import Powerup
 
 class Game:
     
@@ -39,6 +41,17 @@ class Game:
 
         self.selection_queue = 0
 
+        self.powerup = []
+    
+    def randomize_powerup_selection(self):
+        for selection_button in self.selection_button_group.sprites():
+            choice = random.choice(self.powerup)
+            if type(choice) != type([]):
+                selection_button.text = choice.name
+            else:
+                sub_choice = random.choice(choice)
+                selection_button.text = sub_choice.name
+
     def run_game(self):
         self.player_group.add(self.main_player)
     
@@ -51,7 +64,28 @@ class Game:
         selection_button2 = Button((self.window_x/2, self.window_y/2+20), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
         selection_button3 = Button((self.window_x/2, self.window_y/2-80), self.selection_button_group, 'assets/placeholder_assets/small_button.png', 'PLACEHOLDER TEXT')
 
-        timer_text = self.font.render("hello, gamers!", True, (255,255,225))
+        timer_text = self.font.render("", True, (255,255,225))
+
+        # name, level, increment, is_increment, is_percentage
+        gun_powerup = [
+            Powerup('Gun Damage', 1, self.main_player.gun.damage, True, True),
+            Powerup('Gun Firerate', 1, self.main_player.gun.fire_delay, False, True),
+            Powerup('Gun Amount', 1, self.main_player.gun.count, True, False)
+        ]
+        player_powerup = [
+            Powerup('Health', 1, self.main_player.health, True, True),
+            Powerup('Speed', 1, self.main_player.velocity, True, True),
+            Powerup('XP Gain', 1, self.main_player.xp_scaling, True, True),
+        ]
+        aura_powerup = {
+            Powerup('Aura Radius', 1, self.main_player.aura.radius, True, True),
+            Powerup('Aura Damage', 1, self.main_player.aura.damage, True, True),
+            Powerup('Aura Rate', 1, self.main_player.aura.fire_delay, False, True),
+            Powerup('Aura Frequency', 1, self.main_player.aura.count, True, False)
+        }
+        self.powerup.append(gun_powerup)
+        self.powerup.append(player_powerup)
+        self.powerup.append(Powerup('Aura', 0, None, True, True)) # aura check
 
         while True:
             for event in pygame.event.get():
@@ -74,7 +108,7 @@ class Game:
                     self.player_group.update()
                     self.bullet_group.update()
                     self.camera_group.custom_draw(self.main_player) 
-                    
+
                     # timer 
                     self.current_time = pygame.time.get_ticks()
                     if self.current_time - self.timer_time >= 100:
@@ -85,30 +119,27 @@ class Game:
                         self.time_update_check = False
                     timer_text = self.font.render(str(self.game_time / 1000), True, (0, 0, 0))
                     self.screen.blit(timer_text,(100,100))
-                    
-                    # test_enemy.health -= 1
 
                     if self.main_player.selection_check:
+                        self.randomize_powerup_selection()
                         self.state = 'SELECTION'
 
                 elif self.state == 'SELECTION': # in powerup selection screen
                     self.camera_group.custom_draw(self.main_player) # draw background before drawing buttons
                     self.screen.blit(self.powerup_background_image, self.powerup_background_image.get_rect(center = self.center_pos))
                     self.selection_button_group.update() # updates and draws buttons
-                    for selection_button in self.selection_button_group.sprites():
+
+                    for selection_button in self.selection_button_group.sprites(): # powerup selection
                         if selection_button.pressed == True:
-                            if selection_button.text == 'example powerup':
-                                print("do thing")
-                            elif selection_button.text == 'other powerup':
-                                print("do other thing")
+
+                            if self.main_player.selection_queue > 0:
+                                self.main_player.selection_queue -= 1 
+                                self.randomize_powerup_selection() 
+                                self.state = 'SELECTION'
+                                print("again")
                             else:
-                                print("powerup not given, error")
-                                if self.main_player.selection_queue > 0:
-                                    self.main_player.selection_queue -= 1 
-                                    self.state = 'SELECTION'
-                                    print("again")
-                                else:
-                                    self.state = 'RUNNING'
+                                self.state = 'RUNNING'
+
                 elif self.state == 'BAD_END':
                     self.camera_group.custom_draw(self.main_player)
 

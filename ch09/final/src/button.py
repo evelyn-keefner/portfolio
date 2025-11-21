@@ -11,6 +11,10 @@ class Button(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.text = text
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
         self.pressed = False
+        self.not_on_delay = True
+        self.current_time = 0
+        self.click_time = 0
+        self.click_buffer = 1000
 
     def mouse_click(self) -> bool:
         return pygame.mouse.get_pressed(num_buttons=3)[0]
@@ -22,7 +26,10 @@ class Button(pygame.sprite.Sprite): # class inherits from the sprite class to be
                 if self.pressed:
                     pass
                 else:
-                    self.pressed = True
+                    if self.not_on_delay:
+                        self.pressed = True
+                        self.not_on_delay = False
+                        self.click_time = pygame.time.get_ticks()
             else:
                 self.pressed = False
         else:
@@ -33,6 +40,9 @@ class Button(pygame.sprite.Sprite): # class inherits from the sprite class to be
     update handles button input AND drawing of button and text to the screen
     '''
     def update(self):
+        self.current_time = pygame.time.get_ticks()
+        if (self.current_time - self.click_time) >= self.click_buffer:
+            self.not_on_delay = True
         self.input()
         self.display_surface.blit(self.image, self.rect.topleft)
         text = self.font.render(self.text, True, 'black')

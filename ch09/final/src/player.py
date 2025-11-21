@@ -1,6 +1,6 @@
 import pygame
 import math
-from src.bullet import Bullet
+from src.weapon import Weapon
 
 class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be able to add it to a sprite group and use update() and draw()
     def __init__(self, pos, camera_group, enemy_group, experience_group, bullet_group):
@@ -32,6 +32,7 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         
         # leveling
         self.xp = 0
+        self.xp_scaling = 1
         self.level = 1
         self.max_xp = self.max_xp_from_level(self.level)
         self.selection_check = False
@@ -47,11 +48,13 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.invulnerable_time = 500 # invincibility time in milliseconds (0.5 seconds)
         self.damage_time = 0
 
-        # gun and bullets
-        self.fire_delay = 500 # 0.5 seconds in milliseconds
-        self.fire_check = False
-        self.fire_time = 0 # time since last bullet fired
-        self.bullet_damage = 5 
+        # weapons
+        # name, player, fire_delay, damage, radius, count, camera_group, enemy_group, bullet_group
+        self.gun = Weapon('gun', self, 500, 5, 0, 1, self.camera_group, self.enemy_group, self.bullet_group)
+        self.aura = Weapon('aura', self, 500, 1, 50, 1, self.camera_group, self.enemy_group, self.bullet_group)
+        self.active_weapons = [
+            self.gun,
+        ]
         
     def max_xp_from_level(self, level) -> int:
         L = 100 
@@ -114,17 +117,9 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
             self.invulnerable = True
             print(f'Player Health: {self.health}')
 
-        # firing gun
-        if (self.current_time - self.fire_time) > self.fire_delay:
-            self.fire_check = True
-        if (self.fire_check):
-            self.fire_check = False
-            self.fire_time = pygame.time.get_ticks()
-            # fire gun
-            if self.enemy_group.sprites():
-                nearest_enemy = self.find_nearest_enemy(self.enemy_group.sprites())
-                if nearest_enemy:
-                    bullet = Bullet(self.rect.center, self.enemy_vector_normalized(nearest_enemy), self.bullet_damage, self.camera_group, self.bullet_group, self.enemy_group)
+        # firing weapons
+        for weapon in self.active_weapons:
+            weapon.update()
 
         # experience and leveling
         if self.xp < self.max_xp:
@@ -132,7 +127,7 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         contacted_experience = pygame.sprite.spritecollide(self, self.experience_group, False)
         if contacted_experience:
             print(f'{self.xp} / {self.max_xp} Level: {self.level}')
-            self.xp += contacted_experience[0].value
+            self.xp += (contacted_experience[0].value * self.xp_scaling)
             print(f'{self.xp} / {self.max_xp} Level: {self.level}')
             while self.xp >= self.max_xp:
                 self.xp -= self.max_xp
