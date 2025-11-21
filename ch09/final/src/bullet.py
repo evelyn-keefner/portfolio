@@ -9,7 +9,7 @@ class Bullet(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.enemy_group = enemy_group 
 
         self.display_surface = pygame.display.get_surface()
-        self.image = pygame.image.load('assets/assets_ui/start_button.webp')
+        self.image = pygame.image.load('assets/assets_ui/bullet.webp')
         # self.image = pygame.image.load()
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
 
