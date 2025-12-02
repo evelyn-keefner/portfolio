@@ -20,7 +20,7 @@ class Game:
         self.current_time = 0
         self.timer_time = 0
         self.time_update_check = True 
-        self.font = pygame.font.SysFont('arial', 36)
+        self.font = pygame.font.Font('assets/PokemonGB-RAeo.ttf', 36)
         self.window_x, self.window_y = self.screen.get_size()
         self.center_x = int(self.window_x / 2)
         self.center_y = int(self.window_y / 2)
@@ -59,7 +59,10 @@ class Game:
         test_enemy = Enemy((0, 0), 20, 1, 700, self.camera_group, self.experience_group)
         self.enemy_group.add(test_enemy)
     
-        start_button = Button(self.center_pos, self.menu_button_group, 'assets/assets_ui/start_button.webp', '')
+        
+        start_button = Button((self.window_x/2, self.window_y/2+200), self.menu_button_group, 'assets/assets_ui/start_button.webp', '')
+        start_background = pygame.image.load('assets/assets_ui/start_screen.webp')
+        start_background = pygame.transform.scale(start_background, (start_background.get_width()*3, start_background.get_height()*3))
         selection_button1 = Button((self.window_x/2, self.window_y/2+120), self.selection_button_group, 'assets/assets_ui/button.webp', 'PLACEHOLDER TEXT')
         selection_button2 = Button((self.window_x/2, self.window_y/2+20), self.selection_button_group, 'assets/assets_ui/button.webp', 'PLACEHOLDER TEXT')
         selection_button3 = Button((self.window_x/2, self.window_y/2-80), self.selection_button_group, 'assets/assets_ui/button.webp', 'PLACEHOLDER TEXT')
@@ -93,7 +96,8 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-            self.screen.fill("beige") # fills screen to a set background color
+            self.screen.fill((0, 0, 0))
+            self.screen.blit(start_background, (self.window_x/2 - 720, self.window_y/2 - 400))
         
             if self.state == 'START':
                 # any buttons don't need to be drawn, update() also handles drawing
@@ -154,7 +158,7 @@ class Game:
         pygame.quit()
 
 def initialize_pygame():
-    GAME_TITLE = "The Great Emu War"
+    GAME_TITLE = "Swarm Computing"
     pygame.init() 
     pygame.font.init()
     pygame.event.pump() # keeps window responsive

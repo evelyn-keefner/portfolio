@@ -7,7 +7,7 @@ class Button(pygame.sprite.Sprite): # class inherits from the sprite class to be
         w,h = self.image.get_size()
         self.image = pygame.transform.scale(self.image, (2*w,2*h)) if image == 'assets/assets_ui/start_button.webp' else self.image
         self.display_surface = pygame.display.get_surface()
-        self.font = pygame.font.SysFont('Arial', 25)
+        self.font = pygame.font.Font('assets/PokemonGB-RAeo.ttf', 25)
         self.text = text
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
         self.pressed = False
