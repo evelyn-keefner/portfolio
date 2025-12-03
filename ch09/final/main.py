@@ -41,16 +41,14 @@ class Game:
 
         self.selection_queue = 0
 
-        self.powerup = []
+        self.powerup = {}
     
     def randomize_powerup_selection(self):
         for selection_button in self.selection_button_group.sprites():
-            choice = random.choice(self.powerup)
-            if type(choice) != type([]):
-                selection_button.text = choice.name
-            else:
-                sub_choice = random.choice(choice)
-                selection_button.text = sub_choice.name
+            keys = list(self.powerup.keys())
+            choice = random.choice(keys)
+            selection_button.text = choice
+            selection_button.text = "Speed"
 
     def run_game(self):
         self.player_group.add(self.main_player)
@@ -70,25 +68,28 @@ class Game:
         timer_text = self.font.render("", True, (255,255,225))
 
         # name, level, increment, is_increment, is_percentage
-        gun_powerup = [
-            Powerup('Gun Damage', 1, self.main_player.gun.damage, True, True),
-            Powerup('Gun Firerate', 1, self.main_player.gun.fire_delay, False, True),
-            Powerup('Gun Amount', 1, self.main_player.gun.count, True, False)
-        ]
-        player_powerup = [
-            Powerup('Health', 1, self.main_player.health, True, True),
-            Powerup('Speed', 1, self.main_player.velocity, True, True),
-            Powerup('XP Gain', 1, self.main_player.xp_scaling, True, True),
-        ]
-        aura_powerup = {
-            Powerup('Aura Radius', 1, self.main_player.aura.radius, True, True),
-            Powerup('Aura Damage', 1, self.main_player.aura.damage, True, True),
-            Powerup('Aura Rate', 1, self.main_player.aura.fire_delay, False, True),
-            Powerup('Aura Frequency', 1, self.main_player.aura.count, True, False)
+        gun_powerup = {
+            "Gun Damage":Powerup('Gun Damage', 1, self.main_player.gun.damage, True, True),
+            "Gun Firerate":Powerup('Gun Firerate', 1, self.main_player.gun.fire_delay, False, True),
+            "Gun Amount":Powerup('Gun Amount', 1, self.main_player.gun.count, True, False)
         }
-        self.powerup.append(gun_powerup)
-        self.powerup.append(player_powerup)
-        self.powerup.append(Powerup('Aura', 0, None, True, True)) # aura check
+        player_powerup = {
+            "Health":Powerup('Health', 1, self.main_player.health, True, True),
+            "Speed":Powerup('Speed', 1, self.main_player.velocity, True, True),
+            "XP Gain":Powerup('XP Gain', 1, self.main_player.xp_scaling, True, True)
+        }
+        aura_powerup = {
+            "Aura Radius":Powerup('Aura Radius', 1, self.main_player.aura.radius, True, True),
+            "Aura Damage":Powerup('Aura Damage', 1, self.main_player.aura.damage, True, True),
+            "Aura Rate":Powerup('Aura Rate', 1, self.main_player.aura.fire_delay, False, True),
+            "Aura Frequency":Powerup('Aura Frequency', 1, self.main_player.aura.count, True, False)
+        }
+
+        self.powerup.update(gun_powerup)
+
+        self.powerup.update(player_powerup)
+
+        self.powerup.update({"Aura":Powerup('Aura', 0, None, True, True)}) # aura check
 
         while True:
             for event in pygame.event.get():
@@ -135,7 +136,11 @@ class Game:
 
                     for selection_button in self.selection_button_group.sprites(): # powerup selection
                         if selection_button.pressed == True:
+                            # giving powerup
+                            current_powerup = self.powerup[selection_button.text]
+                            current_powerup.give_powerup()
 
+                            # handles overflow xp
                             if self.main_player.selection_queue > 0:
                                 self.main_player.selection_queue -= 1 
                                 self.randomize_powerup_selection() 

@@ -14,7 +14,7 @@ class Button(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.not_on_delay = True
         self.current_time = 0
         self.click_time = 0
-        self.click_buffer = 1000
+        self.click_buffer = 100
 
     def mouse_click(self) -> bool:
         return pygame.mouse.get_pressed(num_buttons=3)[0]
@@ -24,7 +24,7 @@ class Button(pygame.sprite.Sprite): # class inherits from the sprite class to be
         if self.rect.collidepoint(mouse_position):
             if self.mouse_click():
                 if self.pressed:
-                    pass
+                    self.pressed = False
                 else:
                     if self.not_on_delay:
                         self.pressed = True
