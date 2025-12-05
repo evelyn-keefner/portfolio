@@ -165,6 +165,12 @@ class Game:
                     # xp
                     xp_text = self.font.render(f'XP: {round(self.main_player.xp, 2)}/{int(self.main_player.max_xp)}', True, (0, 0, 0))
                     self.screen.blit(xp_text,(100,200))
+                    # xp scaling
+                    xp_scaling_text = self.font.render(f'XP Scaling: {round(self.main_player.xp_scaling, 2)}x', True, (0, 0, 0))
+                    self.screen.blit(xp_scaling_text,(100,400))
+                    # gun amount
+                    gun_amount_text = self.font.render(f'Gun Amount: {self.main_player.gun.count}', True, (0, 0, 0))
+                    self.screen.blit(gun_amount_text,(100,450))
 
                     if self.main_player.selection_check:
                         self.randomize_powerup_selection()
