@@ -9,9 +9,10 @@ from src.button import Button
 from src.experience import Experience
 from src.bullet import Bullet
 from src.powerup import Powerup
+from src.spawner import Spawner
 
 class Game:
-    
+
     def __init__(self):
         self.state = 'START'
         self.screen = pygame.display.set_mode()
@@ -19,7 +20,7 @@ class Game:
         self.game_time = 600000
         self.current_time = 0
         self.timer_time = 0
-        self.time_update_check = True 
+        self.time_update_check = True
         self.font = pygame.font.Font('assets/PokemonGb-RAeo.ttf', 36)
         self.window_x, self.window_y = self.screen.get_size()
         self.center_x = int(self.window_x / 2)
@@ -39,9 +40,33 @@ class Game:
 
         self.main_player = Player(self.center_pos, self.camera_group, self.enemy_group, self.experience_group, self.bullet_group)
 
+        self.enemy_spawner = Spawner(self.camera_group, self.enemy_group, self.experience_group, self.main_player)
+
         self.selection_queue = 0
 
         self.powerup = {}
+
+        # unified enemy animation
+        self.enemy_run = []
+        self.frame_current = 0
+        self.frame_speed = 150
+        self.frame_next = False
+        self.frame_num = 0
+        for i in range(4):
+            self.enemy_run.append(pygame.image.load(f'assets/sprite/enemy2_run{i+1}.webp'))
+
+    def get_enemy_animation(self) :
+        if (self.current_time - self.frame_current) > self.frame_speed:
+            self.frame_next = False
+            self.frame_num += 1
+            if self.frame_num > 3:
+                self.frame_num = 0
+
+        if self.frame_next == False:
+            self.frame_next = True
+            self.frame_current = pygame.time.get_ticks()
+
+        return pygame.transform.scale(self.enemy_run[self.frame_num], (60,120))
 
     def randomize_powerup_selection(self):
         for selection_button in self.selection_button_group.sprites():
@@ -51,13 +76,6 @@ class Game:
 
     def run_game(self):
         self.player_group.add(self.main_player)
-
-        # Enemy(pos, health, damage, experience, group, experience_group)
-        test_enemy = Enemy((0, 0), 20, 1, 700, self.camera_group, self.experience_group)
-        test_enemy_0 = Enemy((0, 0), 200000, 1, 700, self.camera_group, self.experience_group)
-        self.enemy_group.add(test_enemy)
-        self.enemy_group.add(test_enemy_0)
-
 
         start_button = Button((self.window_x/2, self.window_y/2+200), self.menu_button_group, 'assets/assets_ui/start_button.webp', '')
         start_background = pygame.image.load('assets/assets_ui/start_screen.webp')
@@ -100,7 +118,7 @@ class Game:
 
             self.screen.fill((0, 0, 0))
             self.screen.blit(start_background, (self.window_x/2 - 720, self.window_y/2 - 400))
-        
+
             if self.state == 'START':
                 # any buttons don't need to be drawn, update() also handles drawing
                 self.menu_button_group.update()
@@ -109,13 +127,16 @@ class Game:
 
             elif self.state == 'RUNNING' or self.state == 'SELECTION':
                 if self.state != 'SELECTION': # main game loop
-                    # update every group that contains a sprite
-                    self.enemy_group.update(self.main_player)
-                    self.player_group.update()
-                    self.bullet_group.update()
-                    self.camera_group.custom_draw(self.main_player) 
+                    game_time_from_zero = 600000 - self.game_time
+                    self.enemy_spawner.timer_scaled_enemy_spawning(game_time_from_zero)
 
-                    # timer 
+                    # update every group that contains a sprite
+                    self.player_group.update()
+                    self.enemy_group.update(self.main_player, self.get_enemy_animation())
+                    self.bullet_group.update()
+                    self.camera_group.custom_draw(self.main_player)
+
+                    # timer
                     self.current_time = pygame.time.get_ticks()
                     if self.current_time - self.timer_time >= 100:
                         self.time_update_check = True
@@ -127,9 +148,7 @@ class Game:
                     self.screen.blit(timer_text,(100,100))
 
                     if self.main_player.selection_check:
-                        powerup_text = self.randomize_powerup_selection()
-                        if powerup_text == 'Aura':
-                             self.powerup.update(aura_powerup)
+                        self.randomize_powerup_selection()
                         self.state = 'SELECTION'
 
                 elif self.state == 'SELECTION': # in powerup selection screen
@@ -141,14 +160,16 @@ class Game:
                         if selection_button.pressed == True:
                             # giving powerup
                             current_powerup = self.powerup[selection_button.text]
-                            current_powerup.give_powerup()
+                            current_powerup_check = current_powerup.give_powerup()
+                            if current_powerup_check == "Aura":
+                                del self.powerup['Aura']
+                                self.powerup.update(aura_powerup)
+                                print('aura removed & powerups added')
 
                             # handles overflow xp
                             if self.main_player.selection_queue > 0:
-                                self.main_player.selection_queue -= 1 
-                                powerup_text = self.randomize_powerup_selection()
-                                if powerup_text == 'Aura':
-                                    self.powerup.update(aura_powerup)
+                                self.main_player.selection_queue -= 1
+                                self.randomize_powerup_selection()
                                 self.state = 'SELECTION'
                                 print("again")
                             else:
@@ -159,7 +180,7 @@ class Game:
 
                 elif self.state == 'GOOD_END':
                     self.camera_group.custom_draw(self.main_player)
-        
+
             pygame.display.update()
 
             # limit fps to 60
@@ -169,7 +190,7 @@ class Game:
 
 def initialize_pygame():
     GAME_TITLE = "Swarm Computing"
-    pygame.init() 
+    pygame.init()
     pygame.font.init()
     pygame.event.pump() # keeps window responsive
     pygame.display.set_caption(GAME_TITLE)
@@ -177,7 +198,7 @@ def initialize_pygame():
 def main():
     initialize_pygame()
     game = Game()
-    game.run_game() 
+    game.run_game()
 
 if __name__ == '__main__':
     main()

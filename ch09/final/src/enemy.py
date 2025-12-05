@@ -16,6 +16,7 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
         self.damage = damage
         self.experience = experience
         self.tracking_range = 500
+        self.frame = 0
 
     def player_direction(self, player):
         player_coords = player.rect.center
@@ -30,25 +31,27 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
     automatically called when the sprite group an enemy object belongs to has the .update() function called on it
     '''
     def update(self, player, image):
-        # animation handling
-        self.image = image
+        self.frame += 1
 
         player_distance = self.calculate_distance_tuples(self.rect.center, player.rect.center)
         if player_distance < self.tracking_range:
-            self.player_direction(player)
+            # animation handled in main class
+            self.image = image
+            self.rect.center += self.direction * self.velocity
 
-            if self.direction.magnitude() != 0: # magnitude is absolute length of the vector given x and y (a^2 + b^2 = c^2)
-                self.direction = self.direction.normalize() # normalize sets the magnitude to 1, so if two directions are pressed, the vector will be normalized to 1 instead of sqrt(2) 
-            self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
+            if self.frame % 10 == 0:
+                self.player_direction(player)
+                if self.direction.magnitude() != 0: # magnitude is absolute length of the vector given x and y (a^2 + b^2 = c^2)
+                    self.direction = self.direction.normalize() # normalize sets the magnitude to 1, so if two directions are pressed, the vector will be normalized to 1 instead of sqrt(2) 
 
-            if self.direction.x < 0:
-                self.image = pygame.transform.flip(self.image, True, False)
+            if self.frame % 25 == 0:
+                if self.direction.x < 0:
+                    self.image = pygame.transform.flip(self.image, True, False)
 
-            # enemy health & death
-            if self.health <= 0:
-                xp = Experience(self.rect.center, self.camera_group, self.experience) # pos, group, value
-                self.experience_group.add(xp)
-                self.kill()
+                if self.health <= 0:
+                    xp = Experience(self.rect.center, self.camera_group, self.experience) # pos, group, value
+                    self.experience_group.add(xp)
+                    self.kill()
 
 def main():
     print("Wrong file: please run run python3 main.py")

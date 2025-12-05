@@ -8,7 +8,8 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.image = pygame.image.load('assets/sprite/sprite_run1.webp')
         self.image = pygame.transform.scale(self.image, (60,60))
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
-        
+        self.frames = 0
+
         # groups
         self.camera_group = camera_group
         self.enemy_group = enemy_group
@@ -82,30 +83,23 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         else:
             return enemy_vector_normalized
 
+    def calculate_distance_tuples(self, pos1, pos2):
+        return ((pos1[0] - pos2[0]) ** 2 + (pos1[1] - pos2[1]) ** 2) ** 0.5
+
     '''
     is called in the update() function to get player input before updating the player's direction vector
     '''
     def input(self):
         keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_a]: # left
-            self.direction.x = -1
-        elif keys[pygame.K_d]: # right
-            self.direction.x = 1
-        else:
-            self.direction.x = 0
-
-        if keys[pygame.K_w]: # up
-            self.direction.y = -1
-        elif keys[pygame.K_s]: # down
-            self.direction.y = 1
-        else:
-            self.direction.y = 0
+        self.direction.x = (keys[pygame.K_d] - keys[pygame.K_a])  # 1 for right, -1 for left
+        self.direction.y = (keys[pygame.K_s] - keys[pygame.K_w])  # 1 for down, -1 for up
 
     '''
     automatically called when the sprite group a player object is contained in has the .update() method called on it
     '''
     def update(self):
+        self.frames += 1
+
         # movement
         keys = pygame.key.get_pressed() # for distinguishing run animation from idle animation
         self.input()
@@ -118,13 +112,13 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         if (self.current_time - self.damage_time) > self.invulnerable_time:
             self.invulnerable = False
 
-        # enemy collision to cause damage
-        contacted_enemies = pygame.sprite.spritecollide(self, self.enemy_group, False)
-        if contacted_enemies and not self.invulnerable:
-            self.health -= contacted_enemies[0].damage
-            self.damage_time = pygame.time.get_ticks()
-            self.invulnerable = True
-            print(f'Player Health: {self.health}')
+        if self.frames % 10 == 0:
+            # enemy collision to cause damage
+            contacted_enemies = pygame.sprite.spritecollide(self, self.enemy_group, False)
+            if contacted_enemies and not self.invulnerable:
+                self.health -= contacted_enemies[0].damage
+                self.damage_time = pygame.time.get_ticks()
+                self.invulnerable = True
 
         # firing weapons
         for weapon in self.active_weapons:
@@ -143,9 +137,10 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
                 self.level += 1
                 self.max_xp = self.max_xp_from_level(self.level)
                 self.selection_check = True
-                self.selection_queue += 1
                 if self.xp < self.max_xp:
-                    self.xp = 0
+                    pass
+                else:
+                    self.selection_queue += 1
                 print(f'{self.xp} / {self.max_xp} Level: {self.level}')
             contacted_experience[0].kill()
 
