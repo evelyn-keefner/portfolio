@@ -29,7 +29,7 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         # movement
         self.direction = pygame.math.Vector2()
         self.velocity = 5 # how fast character moves
-        
+
         # leveling
         self.xp = 0
         self.xp_scaling = 1
@@ -38,7 +38,7 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.selection_check = False
         self.selection_queue = 0
 
-        
+
         # current time needed for many checks
         self.current_time = pygame.time.get_ticks()
 
@@ -55,25 +55,34 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.active_weapons = [
             self.gun,
         ]
-        
+
     def max_xp_from_level(self, level) -> int:
-        L = 100 
+        L = 100
         k = 0.1
         o = 50
         return int((L / (1 + math.exp(-k * (level - o)))) * 10)
 
     def find_nearest_enemy(self, enemy_list):
-        return min(enemy_list, key=lambda enemy: pygame.math.Vector2(self.rect.x, self.rect.y).distance_to(enemy.rect.center)) if enemy_list else False
+        if not enemy_list:
+            return None
+        player_pos = self.rect.center  # Caching the player's position
+        return min(
+            enemy_list,
+            key=lambda enemy: (enemy.rect.centerx - player_pos[0]) ** 2 + (enemy.rect.centery - player_pos[1]) ** 2
+        )
 
     def enemy_vector_normalized(self, enemy):
         enemy_vector_normalized = pygame.math.Vector2()
-        player_coords = self.rect.center 
+        player_coords = self.rect.center
         enemy_coords = enemy.rect.center
         enemy_vector_normalized.x = (enemy_coords[0] - player_coords[0])
         enemy_vector_normalized.y = (enemy_coords[1] - player_coords[1])
-        return enemy_vector_normalized.normalize()
+        if enemy_vector_normalized.magnitude() != 0:
+            return enemy_vector_normalized.normalize()
+        else:
+            return enemy_vector_normalized
 
-    ''' 
+    '''
     is called in the update() function to get player input before updating the player's direction vector
     '''
     def input(self):
@@ -92,23 +101,23 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
             self.direction.y = 1
         else:
             self.direction.y = 0
-    
+
     '''
     automatically called when the sprite group a player object is contained in has the .update() method called on it
     '''
     def update(self):
-        # movement 
+        # movement
         keys = pygame.key.get_pressed() # for distinguishing run animation from idle animation
         self.input()
-        if self.direction.magnitude() != 0: 
-            self.direction = self.direction.normalize() 
+        if self.direction.magnitude() != 0:
+            self.direction = self.direction.normalize()
             self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
-        
+
         # invulnerability frames
         self.current_time = pygame.time.get_ticks()
         if (self.current_time - self.damage_time) > self.invulnerable_time:
             self.invulnerable = False
-        
+
         # enemy collision to cause damage
         contacted_enemies = pygame.sprite.spritecollide(self, self.enemy_group, False)
         if contacted_enemies and not self.invulnerable:
