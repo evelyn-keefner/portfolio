@@ -20,7 +20,7 @@ class Game:
         self.current_time = 0
         self.timer_time = 0
         self.time_update_check = True 
-        self.font = pygame.font.Font('assets/PokemonGB-RAeo.ttf', 36)
+        self.font = pygame.font.Font('assets/PokemonGb-RAeo.ttf', 36)
         self.window_x, self.window_y = self.screen.get_size()
         self.center_x = int(self.window_x / 2)
         self.center_y = int(self.window_y / 2)
@@ -42,22 +42,23 @@ class Game:
         self.selection_queue = 0
 
         self.powerup = {}
-    
+
     def randomize_powerup_selection(self):
         for selection_button in self.selection_button_group.sprites():
             keys = list(self.powerup.keys())
             choice = random.choice(keys)
             selection_button.text = choice
-            selection_button.text = "Speed"
 
     def run_game(self):
         self.player_group.add(self.main_player)
-    
+
         # Enemy(pos, health, damage, experience, group, experience_group)
         test_enemy = Enemy((0, 0), 20, 1, 700, self.camera_group, self.experience_group)
+        test_enemy_0 = Enemy((0, 0), 200000, 1, 700, self.camera_group, self.experience_group)
         self.enemy_group.add(test_enemy)
-    
-        
+        self.enemy_group.add(test_enemy_0)
+
+
         start_button = Button((self.window_x/2, self.window_y/2+200), self.menu_button_group, 'assets/assets_ui/start_button.webp', '')
         start_background = pygame.image.load('assets/assets_ui/start_screen.webp')
         start_background = pygame.transform.scale(start_background, (start_background.get_width()*3, start_background.get_height()*3))
@@ -69,27 +70,27 @@ class Game:
 
         # name, level, increment, is_increment, is_percentage
         gun_powerup = {
-            "Gun Damage":Powerup('Gun Damage', 1, self.main_player.gun.damage, True, True),
-            "Gun Firerate":Powerup('Gun Firerate', 1, self.main_player.gun.fire_delay, False, True),
-            "Gun Amount":Powerup('Gun Amount', 1, self.main_player.gun.count, True, False)
+            "Gun Damage":Powerup('Gun Damage', 1, "damage", True, True, self.main_player.gun),
+            "Gun Firerate":Powerup('Gun Firerate', 1, "fire_delay", False, True, self.main_player.gun),
+            "Gun Amount":Powerup('Gun Amount', 1, "count", True, False, self.main_player.gun)
         }
         player_powerup = {
-            "Health":Powerup('Health', 1, self.main_player.health, True, True),
-            "Speed":Powerup('Speed', 1, self.main_player.velocity, True, True),
-            "XP Gain":Powerup('XP Gain', 1, self.main_player.xp_scaling, True, True)
+            "Health":Powerup('Health', 1, "health", True, True, self.main_player),
+            "Speed":Powerup('Speed', 1, "velocity", True, True, self.main_player),
+            "XP Gain":Powerup('XP Gain', 1, "xp_scaling", True, True, self.main_player)
         }
         aura_powerup = {
-            "Aura Radius":Powerup('Aura Radius', 1, self.main_player.aura.radius, True, True),
-            "Aura Damage":Powerup('Aura Damage', 1, self.main_player.aura.damage, True, True),
-            "Aura Rate":Powerup('Aura Rate', 1, self.main_player.aura.fire_delay, False, True),
-            "Aura Frequency":Powerup('Aura Frequency', 1, self.main_player.aura.count, True, False)
+            "Aura Radius":Powerup('Aura Radius', 1, "radius", True, True, self.main_player.aura),
+            "Aura Damage":Powerup('Aura Damage', 1, "damage", True, True, self.main_player.aura),
+            "Aura Rate":Powerup('Aura Rate', 1, "fire_delay", False, True, self.main_player.aura),
+            "Aura Frequency":Powerup('Aura Frequency', 1, "count", True, False, self.main_player.aura)
         }
 
         self.powerup.update(gun_powerup)
 
         self.powerup.update(player_powerup)
 
-        self.powerup.update({"Aura":Powerup('Aura', 0, None, True, True)}) # aura check
+        self.powerup.update({"Aura":Powerup('Aura', 0, None, True, True, self.main_player.aura)}) # aura check
 
         while True:
             for event in pygame.event.get():
@@ -126,7 +127,9 @@ class Game:
                     self.screen.blit(timer_text,(100,100))
 
                     if self.main_player.selection_check:
-                        self.randomize_powerup_selection()
+                        powerup_text = self.randomize_powerup_selection()
+                        if powerup_text == 'Aura':
+                             self.powerup.update(aura_powerup)
                         self.state = 'SELECTION'
 
                 elif self.state == 'SELECTION': # in powerup selection screen
@@ -143,7 +146,9 @@ class Game:
                             # handles overflow xp
                             if self.main_player.selection_queue > 0:
                                 self.main_player.selection_queue -= 1 
-                                self.randomize_powerup_selection() 
+                                powerup_text = self.randomize_powerup_selection()
+                                if powerup_text == 'Aura':
+                                    self.powerup.update(aura_powerup)
                                 self.state = 'SELECTION'
                                 print("again")
                             else:
