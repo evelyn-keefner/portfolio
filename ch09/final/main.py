@@ -21,7 +21,7 @@ class Game:
         self.current_time = 0
         self.timer_time = 0
         self.time_update_check = True
-        self.font = pygame.font.Font('assets/PokemonGb-RAeo.ttf', 36)
+        self.font = pygame.font.Font('assets/PokemonGb-RAeo.ttf', 15)
         self.window_x, self.window_y = self.screen.get_size()
         self.center_x = int(self.window_x / 2)
         self.center_y = int(self.window_y / 2)
@@ -53,7 +53,7 @@ class Game:
         self.frame_next = False
         self.frame_num = 0
         for i in range(4):
-            self.enemy_run.append(pygame.image.load(f'assets/sprite/enemy2_run{i+1}.webp'))
+            self.enemy_run.append(pygame.image.load(f'assets/sprite/enemy{self.enemy_spawner.enemy_type}_run{i+1}.webp'))
 
     def get_enemy_animation(self) :
         if (self.current_time - self.frame_current) > self.frame_speed:
@@ -65,8 +65,11 @@ class Game:
         if self.frame_next == False:
             self.frame_next = True
             self.frame_current = pygame.time.get_ticks()
-
-        return pygame.transform.scale(self.enemy_run[self.frame_num], (60,120))
+        
+        if self.enemy_spawner.enemy_type == 1:
+            return pygame.transform.scale(self.enemy_run[self.frame_num], (60,60))
+        else:
+            return pygame.transform.scale(self.enemy_run[self.frame_num], (60,120))
 
     def randomize_powerup_selection(self):
         for selection_button in self.selection_button_group.sprites():
@@ -144,8 +147,24 @@ class Game:
                     if self.time_update_check:
                         self.timer_time = pygame.time.get_ticks()
                         self.time_update_check = False
-                    timer_text = self.font.render(str(self.game_time / 1000), True, (0, 0, 0))
+                    timer_text = self.font.render(f'Time: {self.game_time / 1000}', True, (0, 0, 0))
                     self.screen.blit(timer_text,(100,100))
+
+                    # health amount
+                    health_text = self.font.render(f'Health: {int(self.main_player.health)}', True, (0, 0, 0))
+                    self.screen.blit(health_text,(100,150))
+                    # firerate
+                    firerate_text = self.font.render(f'Firerate: {round(self.main_player.gun.fire_delay, 2)}s', True, (0, 0, 0))
+                    self.screen.blit(firerate_text,(100,250))
+                    # damage
+                    damage_text = self.font.render(f'Damage: {round(self.main_player.gun.damage, 2)}', True, (0, 0, 0))
+                    self.screen.blit(damage_text,(100,300))
+                    # speed
+                    speed_text = self.font.render(f'Speed: {round(self.main_player.velocity, 2)}', True, (0, 0, 0))
+                    self.screen.blit(speed_text,(100,350))
+                    # xp
+                    xp_text = self.font.render(f'XP: {round(self.main_player.xp, 2)}/{int(self.main_player.max_xp)}', True, (0, 0, 0))
+                    self.screen.blit(xp_text,(100,200))
 
                     if self.main_player.selection_check:
                         self.randomize_powerup_selection()

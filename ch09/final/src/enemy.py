@@ -1,11 +1,13 @@
 import pygame
+import random
 from src.experience import Experience
 
 class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be able to add it to a sprite group and use update() and draw()
-    def __init__(self, pos, health, damage, experience, group, experience_group):
+    def __init__(self, pos, health, damage, experience, group, experience_group, type):
         super().__init__(group) # adds player sprite into the camera_group sprite group calling the sprite constructor Sprite(self, group)
-        self.image = pygame.image.load('assets/sprite/enemy2_run1.webp')
-        self.image = pygame.transform.scale(self.image, (60,120))
+        self.type  = type
+        self.image = pygame.image.load(f'assets/sprite/enemy{self.type}_run1.webp')
+        self.image = pygame.transform.scale(self.image, (self.image.get_width()*2,self.image.get_height()*2))
         self.camera_group = group
         self.experience_group = experience_group
         self.current_time = pygame.time.get_ticks()

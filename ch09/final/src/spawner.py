@@ -3,7 +3,7 @@ import random
 from src.enemy import Enemy
 
 class Spawner():
-    def __init__(self, camera_group, enemy_group, experience_group, player):
+    def __init__(self, camera_group, enemy_group, experience_group, player, type):
         self.display_surface = pygame.display.get_surface()
         self.screen_width = self.display_surface.get_width()
         self.screen_height = self.display_surface.get_height()
@@ -11,6 +11,7 @@ class Spawner():
         self.enemy_group = enemy_group
         self.experience_group = experience_group
         self.player = player
+        self.enemy_type = type
 
         self.scaled_spawning_interval = 5000
 
@@ -75,7 +76,7 @@ class Spawner():
 
         position = self.get_random_position()
         # Enemy(pos, health, damage, experience, group, experience_group)
-        enemy = Enemy(position, self.scaled_health, self.scaled_damage, self.scaled_experience, self.camera_group, self.experience_group)
+        enemy = Enemy(position, self.scaled_health, self.scaled_damage, self.scaled_experience, self.camera_group, self.experience_group, self.enemy_type)
         self.enemy_group.add(enemy)
 
     def get_random_position(self) -> tuple:
