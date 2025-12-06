@@ -140,15 +140,19 @@ class Game:
 
             self.screen.fill((0, 0, 0))
             self.screen.blit(start_background, (self.window_x/2 - 720, self.window_y/2 - 400))
-            intruction_text1 = self.font.render('Press start to begin.', True, (255, 255, 255))
+            instruction_text1 = self.font.render('Press start to begin.', True, (255, 255, 255))
             instruction_text2 = self.font.render('Use WASD to move.', True, (255, 255, 255))
-            self.screen.blit(intruction_text1,(100,250))
+            instruction_text3 = self.font.render('Use Q to Quit.', True, (255, 255, 255))
+            instruction_text4 = self.font.render('Survive the Swarm.', True, (255, 255, 255))
+            self.screen.blit(instruction_text1,(100,250))
             self.screen.blit(instruction_text2,(100,300))
+            self.screen.blit(instruction_text3,(100,350))
+            self.screen.blit(instruction_text4,(100,400))
 
             if self.state == 'START':
                 # any buttons don't need to be drawn, update() also handles drawing
                 self.menu_button_group.update()
-                instruction_text = self.font.render(f'Press Start then use WASD to control your character!', True, (0, 0, 0))
+                instruction_text = self.font.render('Press Start', True, (0, 0, 0))
                 self.screen.blit(instruction_text, (self.center_x, self.center_y))
                 if start_button.pressed:
                     self.state = 'RUNNING'

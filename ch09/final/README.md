@@ -66,6 +66,16 @@ Button
 
 | Step                 |Procedure             |Expected Results                   |
 |----------------------|:--------------------:|----------------------------------:|
-|  1                   | Run Counter Program  |GUI window appears with count = 0  |
-|  2                   | click count button   | display changes to count = 1      |
-etc...
+|  1                   | Run Program          | GUI Window Appears with a start screen |
+|  2                   | click start button   | display changes scene to a flat grid and a player in the center with enemy sprites spawning in around the player, there is constant updating information in the top left | 
+| 3                    | click W, A, S, D keys| Player sprites should move up, left, down, right respectively |
+| 4                    | Walk near enemy      | Enemy should begin heading in the direction of the player and the player should begin firing bullets |
+| 5                    | Enemy dies from bullet | The enemy should drop an experience orb that can be picked up and the xp display in the top left should update respectively |
+| 6                    | Player surpasses maximum xp for their level | The game switches scene and the player is presented 3 options, the game in the back is frozen |
+| 7                    | Player selects powerup | The corresponding statistic should increase or decrease and influence the game directly, given the player only levels up once the game returns back to the main loop, if the player levels up multiple times they are given the option to choose another powerup |
+| 8                    | Player runs into enemy | Player heatlh decreases |
+| 9                    | Player health is 0     | Game end screen appears, with option to quit or restart |
+| 10                   | Restart button pressed | Game restarts | 
+| 11                   | Quit button pressed    | Game window closes |
+| 12                   | Q is pressed during main loop | Game window closes |
+| 13                   | Time ticks to 0        | A win screen is presented with the options to quit or restart
