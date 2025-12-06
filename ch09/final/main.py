@@ -133,8 +133,6 @@ class Game:
             if self.state == 'START':
                 # any buttons don't need to be drawn, update() also handles drawing
                 self.menu_button_group.update()
-                instruction_text = self.font.render(f'Press Start then use WASD to control your character!', True, (0, 0, 0))
-                self.screen.blit(instruction_text, (self.center_x, self.center_y))
                 if start_button.pressed:
                     self.state = 'RUNNING'
             elif self.state == 'RUNNING' or self.state == 'SELECTION':
