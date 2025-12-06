@@ -62,6 +62,12 @@ Powerup
 Button
     Used to render the buttons used for the start screen and the upgrade screen.
 
+Weapon
+    Handles multiple weapon types
+
+Spawner
+    Handles enemy spawning and incremental scaling of difficulty
+
 ## ATP
 
 | Step                 |Procedure             |Expected Results                   |
