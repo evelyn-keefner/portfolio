@@ -20,11 +20,15 @@ The enemy's difficulty increases as time goes on.
 
 ### Initial Design
 
-![initial gui](assets/gui.jpg)
+![initial gui](assets/initialgui1.png)
+![initial gui](assets/initialgui2.png)
+![initial gui](assets/initialgui3.png)
 
 ### Final Design
 
-![final gui](assets/finalgui.jpg)
+![final gui](assets/newgui1.png)
+![final gui](assets/newgui2.png)
+![final gui](assets/newgui3.png)
 
 ## Program Design
 
