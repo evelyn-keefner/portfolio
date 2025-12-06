@@ -11,6 +11,12 @@ class Powerup:
         self.object = object
 
     def give_powerup(self) -> str:
+        '''
+        Handles incrementing or decrementing values
+        args: None
+        returns: str
+            In the case the player selects a new weapon and not an upgrade a string is returned to be used in main() to update powerup list
+        '''
         if self.increment == None:
             return self.name
 

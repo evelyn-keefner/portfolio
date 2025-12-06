@@ -7,9 +7,6 @@ class Experience(pygame.sprite.Sprite): # class inherits from the sprite class t
         self.rect = self.image.get_rect(center = pos) # image_group needs an image and a rect in order to use it's built in functions draw() and update()
         self.value = value
 
-    '''
-    automatically called when the sprite group an enemy object belongs to has the .update() function called on it
-    '''
     def update(self, player):
         pass
 

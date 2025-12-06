@@ -59,12 +59,30 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
         ]
 
     def max_xp_from_level(self, level) -> int:
+        '''
+        Determines the next maximum xp goal to level up using a logistic function
+        args: 
+            int
+                the player's current level as an input for the logistic function
+        returns:
+            int
+                the next xp goal for the player to level up
+        '''
         L = 100
         k = 0.1
         o = 50
         return int((L / (1 + math.exp(-k * (level - o)))) * 10)
 
     def find_nearest_enemy(self, enemy_list):
+        '''
+        determines the nearesst enemy to the player
+        args: 
+            [pygame.sprite]
+                list of all enemies
+        returns:
+            pygame.sprite
+                The closest enemy object
+        '''
         if not enemy_list:
             return None
         player_pos = self.rect.center  # Caching the player's position
@@ -73,59 +91,75 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
             key=lambda enemy: (enemy.rect.centerx - player_pos[0]) ** 2 + (enemy.rect.centery - player_pos[1]) ** 2
         )
 
-    def enemy_vector_normalized(self, enemy):
-        enemy_vector_normalized = pygame.math.Vector2()
-        player_coords = self.rect.center
-        enemy_coords = enemy.rect.center
-        enemy_vector_normalized.x = (enemy_coords[0] - player_coords[0])
-        enemy_vector_normalized.y = (enemy_coords[1] - player_coords[1])
-        if enemy_vector_normalized.magnitude() != 0:
-            return enemy_vector_normalized.normalize()
-        else:
-            return enemy_vector_normalized
-
     def calculate_distance_tuples(self, pos1, pos2):
+        '''
+        returns the absolute distance between two coordinate pair values
+        args:
+            (int)
+                tuple of first position
+            (int)
+                tuple of second position
+        returns: None
+        ''' 
         return ((pos1[0] - pos2[0]) ** 2 + (pos1[1] - pos2[1]) ** 2) ** 0.5
-
-    '''
-    is called in the update() function to get player input before updating the player's direction vector
-    '''
-    def input(self):
-        keys = pygame.key.get_pressed()
-        self.direction.x = (keys[pygame.K_d] - keys[pygame.K_a])  # 1 for right, -1 for left
-        self.direction.y = (keys[pygame.K_s] - keys[pygame.K_w])  # 1 for down, -1 for up
-
-    '''
-    automatically called when the sprite group a player object is contained in has the .update() method called on it
-    '''
-    def update(self):
-        self.frames += 1
-
-        # movement
-        keys = pygame.key.get_pressed() # for distinguishing run animation from idle animation
-        self.input()
-        if self.direction.magnitude() != 0:
-            self.direction = self.direction.normalize()
-            self.rect.center += self.direction * self.velocity # rect.center is a tuple and vector2's are compatable with operations involving tuples'
-
-        # invulnerability frames
+    
+    def invincibility_frames(self):
+        '''
+        makes the player invulnerable after taking damage
+        args: None
+        returns: None
+        '''
         self.current_time = pygame.time.get_ticks()
         if (self.current_time - self.damage_time) > self.invulnerable_time:
             self.invulnerable = False
 
-        if self.frames % 10 == 0:
-            # enemy collision to cause damage
-            contacted_enemies = pygame.sprite.spritecollide(self, self.enemy_group, False)
-            if contacted_enemies and not self.invulnerable:
-                self.health -= contacted_enemies[0].damage
-                self.damage_time = pygame.time.get_ticks()
-                self.invulnerable = True
+    def enemy_collision(self):
+        '''
+        Handles enemy collision and inflicts enemy damage
+        args: None
+        returns: None
+        '''
+        contacted_enemies = pygame.sprite.spritecollide(self, self.enemy_group, False)
+        if contacted_enemies and not self.invulnerable:
+            self.health -= contacted_enemies[0].damage
+            self.damage_time = pygame.time.get_ticks()
+            self.invulnerable = True
 
-        # firing weapons
+    def input(self):
+        '''
+        Updates player movement vector based on inputs from the WASD keys by the user
+        args: None
+        returns: None
+        '''
+        keys = pygame.key.get_pressed()
+        self.direction.x = (keys[pygame.K_d] - keys[pygame.K_a])  # 1 for right, -1 for left
+        self.direction.y = (keys[pygame.K_s] - keys[pygame.K_w])  # 1 for down, -1 for up
+    
+    def movement(self):
+        '''
+        Updates player position from movement vector
+        args: None
+        returns: None
+        '''
+        if self.direction.magnitude() != 0:
+            self.direction = self.direction.normalize()
+            self.rect.center += self.direction * self.velocity
+    
+    def update_weapons(self):
+        '''
+        Calls .update() on all active weapons
+        args: None
+        returns: None
+        '''
         for weapon in self.active_weapons:
             weapon.update()
 
-        # experience and leveling
+    def experience(self):
+        '''
+        Handles experience collision and leveling up
+        args: None
+        returns: None
+        '''
         if self.xp < self.max_xp:
             self.selection_check = False
         contacted_experience = pygame.sprite.spritecollide(self, self.experience_group, False)
@@ -145,7 +179,13 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
                 print(f'{self.xp} / {self.max_xp} Level: {self.level}')
             contacted_experience[0].kill()
 
-        # animation handling
+    def animation(self):
+        '''
+        Handles player animation and frames
+        args: None
+        returns: None
+        '''
+        keys = pygame.key.get_pressed() # for distinguishing run animation from idle animation
         if (self.current_time - self.frame_current) > self.frame_speed:
             self.frame_next = False
             self.frame_num += 1
@@ -162,6 +202,25 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
             else:
                 self.image = self.player_sprite_idle[self.frame_num]
                 self.image = pygame.transform.scale(self.image, (60,60))
+
+    def update(self):
+        '''
+        updates player variables
+        args: None
+        returns: None
+        '''
+        self.frames += 1
+
+        self.input()
+        self.movement()
+        self.invincibility_frames()
+
+        if self.frames % 10 == 0:
+            self.enemy_collision()
+
+        self.update_weapons()
+        self.experience()
+        self.animation()
 
 def main():
     print("Wrong file: please run run python3 main.py")

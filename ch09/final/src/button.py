@@ -17,10 +17,25 @@ class Button(pygame.sprite.Sprite): # class inherits from the sprite class to be
         self.click_buffer = 100
 
     def mouse_click(self) -> bool:
+        '''
+        returns whether or not the left mouse button has been clicked
+        args: None
+        returns: bool
+            State of left mouse button
+        '''
         return pygame.mouse.get_pressed(num_buttons=3)[0]
 
     def input(self):
+        '''
+        handles user input, and updates object state to reflect if self is pressed or not
+        args: None
+        returns: None
+        '''
+        self.current_time = pygame.time.get_ticks()
         mouse_position = pygame.mouse.get_pos() 
+
+        if (self.current_time - self.click_time) >= self.click_buffer:
+            self.not_on_delay = True
         if self.rect.collidepoint(mouse_position):
             if self.mouse_click():
                 if self.pressed:
@@ -34,21 +49,27 @@ class Button(pygame.sprite.Sprite): # class inherits from the sprite class to be
                 self.pressed = False
         else:
             self.pressed = False
-
-    '''
-    automatically called when the sprite group a button object is contained in has the .update() method called on it
-    update handles button input AND drawing of button and text to the screen
-    '''
-    def update(self):
-        self.current_time = pygame.time.get_ticks()
-        if (self.current_time - self.click_time) >= self.click_buffer:
-            self.not_on_delay = True
-        self.input()
+    
+    def display_updates(self):
+        '''
+        handles rendering of text and background of button and draws it to the screen
+        args: None
+        returns: None
+        '''
         self.display_surface.blit(self.image, self.rect.topleft)
         text = self.font.render(self.text, True, 'black')
         text_rect = text.get_rect(center=self.rect.center)
         self.display_surface.blit(text, text_rect)
 
+    def update(self):
+        '''
+        updates input and displays button to the screen
+        args: None
+        returns: None
+        '''
+        self.input()
+        self.display_updates()
+        
 def main():
     print("Wrong file: please run python3 main.py")
 

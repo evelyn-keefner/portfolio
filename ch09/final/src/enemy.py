@@ -21,18 +21,38 @@ class Enemy(pygame.sprite.Sprite): # class inherits from the sprite class to be 
         self.frame = 0
 
     def player_direction(self, player):
+        '''
+        calculates the location of the player and updates the enemy movement vector to point toward the player
+        args: pygame.sprite
+            the player object
+        returns: None
+        '''
         player_coords = player.rect.center
         enemy_coords = self.rect.center
         self.direction.x = (player_coords[0] - enemy_coords[0])
         self.direction.y = (player_coords[1] - enemy_coords[1])
 
     def calculate_distance_tuples(self, pos1, pos2):
+        '''
+        returns the absolute distance between two coordinate pair values
+        args:
+            (int)
+                tuple of first position
+            (int)
+                tuple of second position
+        returns: None
+        ''' 
         return ((pos1[0] - pos2[0]) ** 2 + (pos1[1] - pos2[1]) ** 2) ** 0.5
 
-    '''
-    automatically called when the sprite group an enemy object belongs to has the .update() function called on it
-    '''
     def update(self, player, image):
+        '''
+        handles movement, death, and experience spawning
+        args:
+            pygame.sprite
+                The player object
+            pygame.image
+                The current animation frame from main()
+        '''
         self.frame += 1
 
         player_distance = self.calculate_distance_tuples(self.rect.center, player.rect.center)
