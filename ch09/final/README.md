@@ -32,9 +32,9 @@ The enemy's difficulty increases as time goes on.
 
 1. Enemies; the enemies become more difficult (i.e. more health) over time.
 2. Upgrades; the player can upgrade themselves or weapons from xp
-3. Infite map; the game loads a 3x3 chunk around the player at all times and emulates an infinitely expansive area.
-4. << Feature 4 >>
-5. << Feature 5 >>
+3. Infinite map; the game loads a 3x3 chunk around the player at all times and emulates an infinitely expansive area.
+4. Replayability & Ending Screen; When the player either wins by surviving for 10 minutes or dies to the enemies, an ending screen gives the player the option to try again or to exit 
+5. Animation System; The player and the enemies are animated by using loaded images from the assets folder
 
 ### Classes
 

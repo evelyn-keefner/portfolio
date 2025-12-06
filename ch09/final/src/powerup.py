@@ -18,10 +18,18 @@ class Powerup:
             self.level += 1
             if self.is_percentage: # multiplicative scaling
                 if self.is_increment: # multiplicative & increasing
-                    new_value = getattr(self.object, self.increment) * 1.05
+                    if self.name == 'Gun Damage':
+                        new_value = getattr(self.object, self.increment) * 1.5
+                    elif self.name == 'Health':
+                        new_value = getattr(self.object, self.increment) * 1.2
+                        setattr(self.object, 'health', new_value) # heals the player to max when picking up
+                    else:
+                        new_value = getattr(self.object, self.increment) * 1.25
+
                     setattr(self.object, self.increment, new_value)
+
                 else: # multiplicative & decreasing
-                    new_value = getattr(self.object, self.increment) * 0.95
+                    new_value = getattr(self.object, self.increment) * 0.85
                     setattr(self.object, self.increment, new_value)
             else: # additive scaling
                 if self.is_increment: # additive & increasing

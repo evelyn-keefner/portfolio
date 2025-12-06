@@ -45,6 +45,7 @@ class Player(pygame.sprite.Sprite): # class inherits from the sprite class to be
 
         # damage & health
         self.health = 20
+        self.max_health = 20
         self.invulnerable = False
         self.invulnerable_time = 500 # invincibility time in milliseconds (0.5 seconds)
         self.damage_time = 0

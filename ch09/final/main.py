@@ -31,6 +31,7 @@ class Game:
         self.enemy_group = pygame.sprite.Group()
         self.menu_button_group = pygame.sprite.Group()
         self.selection_button_group = pygame.sprite.Group()
+        self.end_button_group = pygame.sprite.Group()
         self.experience_group = pygame.sprite.Group()
         self.bullet_group = pygame.sprite.Group()
 
@@ -86,7 +87,8 @@ class Game:
         selection_button1 = Button((self.window_x/2, self.window_y/2+120), self.selection_button_group, 'assets/assets_ui/button.webp', 'PLACEHOLDER TEXT')
         selection_button2 = Button((self.window_x/2, self.window_y/2+20), self.selection_button_group, 'assets/assets_ui/button.webp', 'PLACEHOLDER TEXT')
         selection_button3 = Button((self.window_x/2, self.window_y/2-80), self.selection_button_group, 'assets/assets_ui/button.webp', 'PLACEHOLDER TEXT')
-
+        exit_game_button = Button((self.center_x, self.center_y), self.end_button_group, 'assets/assets_ui/button.webp', 'Exit?')
+        reset_button = Button((self.center_x, self.center_y + 100), self.end_button_group, 'assets/assets_ui/button.webp', 'Retry?')
         timer_text = self.font.render("", True, (255,255,225))
 
         # name, level, increment, is_increment, is_percentage
@@ -96,10 +98,12 @@ class Game:
             "Gun Amount":Powerup('Gun Amount', 1, "count", True, False, self.main_player.gun)
         }
         player_powerup = {
-            "Health":Powerup('Health', 1, "health", True, True, self.main_player),
+            "Health":Powerup('Health', 1, "max_health", True, True, self.main_player),
             "Speed":Powerup('Speed', 1, "velocity", True, True, self.main_player),
             "XP Gain":Powerup('XP Gain', 1, "xp_scaling", True, True, self.main_player)
         }
+
+        # unused 
         aura_powerup = {
             "Aura Radius":Powerup('Aura Radius', 1, "radius", True, True, self.main_player.aura),
             "Aura Damage":Powerup('Aura Damage', 1, "damage", True, True, self.main_player.aura),
@@ -111,7 +115,7 @@ class Game:
 
         self.powerup.update(player_powerup)
 
-        self.powerup.update({"Aura":Powerup('Aura', 0, None, True, True, self.main_player.aura)}) # aura check
+        # self.powerup.update({"Aura":Powerup('Aura', 0, None, True, True, self.main_player.aura)}) # aura check
 
         while True:
             for event in pygame.event.get():
@@ -129,9 +133,10 @@ class Game:
             if self.state == 'START':
                 # any buttons don't need to be drawn, update() also handles drawing
                 self.menu_button_group.update()
+                instruction_text = self.font.render(f'Press Start then use WASD to control your character!', True, (0, 0, 0))
+                self.screen.blit(instruction_text, (self.center_x, self.center_y))
                 if start_button.pressed:
                     self.state = 'RUNNING'
-
             elif self.state == 'RUNNING' or self.state == 'SELECTION':
                 if self.state != 'SELECTION': # main game loop
                     game_time_from_zero = 600000 - self.game_time
@@ -151,14 +156,15 @@ class Game:
                     if self.time_update_check:
                         self.timer_time = pygame.time.get_ticks()
                         self.time_update_check = False
+
                     timer_text = self.font.render(f'Time: {self.game_time / 1000}', True, (0, 0, 0))
                     self.screen.blit(timer_text,(100,100))
 
                     # health amount
-                    health_text = self.font.render(f'Health: {int(self.main_player.health)}', True, (0, 0, 0))
+                    health_text = self.font.render(f'Health: {int(self.main_player.health)} / {int(self.main_player.max_health)}', True, (0, 0, 0))
                     self.screen.blit(health_text,(100,150))
                     # firerate
-                    firerate_text = self.font.render(f'Firerate: {round(self.main_player.gun.fire_delay, 2)}s', True, (0, 0, 0))
+                    firerate_text = self.font.render(f'Firerate: {round(self.main_player.gun.fire_delay, 2)}ms', True, (0, 0, 0))
                     self.screen.blit(firerate_text,(100,250))
                     # damage
                     damage_text = self.font.render(f'Damage: {round(self.main_player.gun.damage, 2)}', True, (0, 0, 0))
@@ -175,6 +181,13 @@ class Game:
                     # gun amount
                     gun_amount_text = self.font.render(f'Gun Amount: {self.main_player.gun.count}', True, (0, 0, 0))
                     self.screen.blit(gun_amount_text,(100,450))
+                    
+                    if self.main_player.health <= 0:
+                        self.state = 'BAD_END'
+                        print("BAD ENDING")
+                    
+                    if self.game_time < 0:
+                        self.state = 'GOOD_END'
 
                     if self.main_player.selection_check:
                         self.randomize_powerup_selection()
@@ -200,15 +213,47 @@ class Game:
                                 self.main_player.selection_queue -= 1
                                 self.randomize_powerup_selection()
                                 self.state = 'SELECTION'
-                                print("again")
                             else:
                                 self.state = 'RUNNING'
 
-                elif self.state == 'BAD_END':
-                    self.camera_group.custom_draw(self.main_player)
+            elif self.state == 'BAD_END':
+                self.camera_group.custom_draw(self.main_player)
+                bad_end_text = self.font.render(f'You lost! You reached level {self.main_player.level}', True, (0, 0, 0))
+                self.screen.blit(bad_end_text, (self.center_x - 200, self.center_y - 100))
+                self.end_button_group.update()
+                if reset_button.pressed == True:
+                    self.game_time = 600000
+                    enemies = self.enemy_group.sprites()
+                    for enemy in enemies:
+                        enemy.kill()
+                    self.player_group.remove(self.main_player)
+                    self.main_player.kill()
+                    self.main_player = Player(self.center_pos, self.camera_group, self.enemy_group, self.experience_group, self.bullet_group)
+                    self.player_group.add(self.main_player)
+                    self.state = 'START'
 
-                elif self.state == 'GOOD_END':
-                    self.camera_group.custom_draw(self.main_player)
+                if exit_game_button.pressed == True:
+                    pygame.quit()
+
+            elif self.state == 'GOOD_END':
+                self.camera_group.custom_draw(self.main_player)
+                good_end_text = self.font.render(f'You won! You reached level {self.main_player.level}', True, (0, 0, 0))
+                self.screen.blit(good_end_text, (self.center_x - 200, self.center_y - 100))
+                self.end_button_group.update()
+
+                if reset_button.pressed == True:
+                    self.game_time = 600000
+                    enemies = self.enemy_group.sprites()
+                    for enemy in enemies:
+                        enemy.kill()
+                    self.player_group.remove(self.main_player)
+                    self.main_player.kill()
+                    self.main_player = Player(self.center_pos, self.camera_group, self.enemy_group, self.experience_group, self.bullet_group)
+                    self.player_group.add(self.main_player)
+                    self.state = 'START'
+
+                if exit_game_button.pressed == True:
+                    pygame.quit()
 
             pygame.display.update()
 
