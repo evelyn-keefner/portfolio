@@ -121,6 +121,10 @@ class Game:
 
             self.screen.fill((0, 0, 0))
             self.screen.blit(start_background, (self.window_x/2 - 720, self.window_y/2 - 400))
+            intruction_text1 = self.font.render('Press start to begin.', True, (255, 255, 255))
+            instruction_text2 = self.font.render('Use WASD to move.', True, (255, 255, 255))
+            self.screen.blit(intruction_text1,(100,250))
+            self.screen.blit(instruction_text2,(100,300))
 
             if self.state == 'START':
                 # any buttons don't need to be drawn, update() also handles drawing
