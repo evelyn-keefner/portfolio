@@ -27,6 +27,12 @@ class Spawner():
         self.random_position_array = [True, False]
 
     def timer_scaled_enemy_spawning(self, time):
+        '''
+        Handles enemy scaling and timing of the game
+        args: int
+            the time in milliseconds that has passed in the game
+        returns: None
+        '''
         self.current_time = pygame.time.get_ticks()
         interval = self.current_time - self.time_last_spawned
         if time > 540000: # 9 to end (10 minutes)
@@ -72,6 +78,11 @@ class Spawner():
             self.spawn_enemy()
 
     def spawn_enemy(self):
+        '''
+        Creates a new enemy object with proper stats
+        args: None
+        returns: None
+        '''
         self.time_last_spawned = pygame.time.get_ticks()
 
         position = self.get_random_position()
@@ -80,6 +91,12 @@ class Spawner():
         self.enemy_group.add(enemy)
 
     def get_random_position(self) -> tuple:
+        '''
+        Returns a random position in a ring around the player
+        args: None
+        returns: (int)
+            a tuple with the new position in the format (x, y)
+        '''
         player_position = self.player.rect.center
         positive_x = random.choice(self.random_position_array)
         positive_y = random.choice(self.random_position_array)

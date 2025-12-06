@@ -12,7 +12,6 @@ from src.powerup import Powerup
 from src.spawner import Spawner
 
 class Game:
-
     def __init__(self):
         self.state = 'START'
         self.screen = pygame.display.set_mode()
@@ -55,8 +54,14 @@ class Game:
         self.frame_num = 0
         for i in range(4):
             self.enemy_run.append(pygame.image.load(f'assets/sprite/enemy{self.enemy_spawner.enemy_type}_run{i+1}.webp'))
-
-    def get_enemy_animation(self) :
+    
+    def get_enemy_animation(self):
+        ''' 
+        handles enemy animation
+        args: None
+        returns: pygame.image
+            the current frame of in the enemy animation cycle 
+        '''
         if (self.current_time - self.frame_current) > self.frame_speed:
             self.frame_next = False
             self.frame_num += 1
@@ -66,19 +71,29 @@ class Game:
         if self.frame_next == False:
             self.frame_next = True
             self.frame_current = pygame.time.get_ticks()
-        
+
         if self.enemy_spawner.enemy_type == 1:
             return pygame.transform.scale(self.enemy_run[self.frame_num], (60,60))
         else:
             return pygame.transform.scale(self.enemy_run[self.frame_num], (60,120))
 
     def randomize_powerup_selection(self):
+        '''
+        Randomizes the powerup choices in the selection screen when the player levels up
+        args: None
+        returns: None
+        '''
         for selection_button in self.selection_button_group.sprites():
             keys = list(self.powerup.keys())
             choice = random.choice(keys)
             selection_button.text = choice
 
     def run_game(self):
+        '''
+        Runs the main game loop
+        args: None
+        returns: None
+        '''
         self.player_group.add(self.main_player)
 
         start_button = Button((self.window_x/2, self.window_y/2+200), self.menu_button_group, 'assets/assets_ui/start_button.webp', '')
@@ -125,10 +140,14 @@ class Game:
 
             self.screen.fill((0, 0, 0))
             self.screen.blit(start_background, (self.window_x/2 - 720, self.window_y/2 - 400))
-            intruction_text1 = self.font.render('Press start to begin.', True, (255, 255, 255))
+            instruction_text1 = self.font.render('Press start to begin.', True, (255, 255, 255))
             instruction_text2 = self.font.render('Use WASD to move.', True, (255, 255, 255))
-            self.screen.blit(intruction_text1,(100,250))
+            instruction_text3 = self.font.render('Use Q to Quit.', True, (255, 255, 255))
+            instruction_text4 = self.font.render('Survive the Swarm.', True, (255, 255, 255))
+            self.screen.blit(instruction_text1,(100,250))
             self.screen.blit(instruction_text2,(100,300))
+            self.screen.blit(instruction_text3,(100,350))
+            self.screen.blit(instruction_text4,(100,400))
 
             if self.state == 'START':
                 # any buttons don't need to be drawn, update() also handles drawing
@@ -261,6 +280,11 @@ class Game:
         pygame.quit()
 
 def initialize_pygame():
+    '''
+    Initializes pygame, does basic setup, and sets the window title of the game 
+    args: None
+    returns: None
+    '''
     GAME_TITLE = "Swarm Computing"
     pygame.init()
     pygame.font.init()

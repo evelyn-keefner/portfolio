@@ -66,6 +66,12 @@ Powerup
 Button
     Used to render the buttons used for the start screen and the upgrade screen.
 
+Weapon
+    Handles multiple weapon types
+
+Spawner
+    Handles enemy spawning and incremental scaling of difficulty
+
 ## ATP
 Test: Start screen UI
 Desc: Checks the start screen renders and functions as it should.

@@ -21,10 +21,13 @@ class Aura(pygame.sprite.Sprite): # class inherits from the sprite class to be a
         self.spawn_time = pygame.time.get_ticks()
         self.current_time = pygame.time.get_ticks()
         self.bullet_lifetime = 2500 # 2.5 seconds
-    '''
 
-    '''
     def update(self):
+        '''
+        Updates self 
+        args: None
+        returns: None
+        '''
         if self.direction.magnitude() != 0:
             self.rect.center += self.direction * self.velocity
 
