@@ -1,300 +1,161 @@
-import pygame
 import sys
-import time
-import random
-from src.player import Player
-from src.enemy import Enemy
-from src.camera import CameraGroup
-from src.button import Button
-from src.experience import Experience
-from src.bullet import Bullet
-from src.powerup import Powerup
-from src.spawner import Spawner
-
-class Game:
-    def __init__(self):
-        self.state = 'START'
-        self.screen = pygame.display.set_mode()
-        self.clock = pygame.time.Clock()
-        self.game_time = 600000
-        self.current_time = 0
-        self.timer_time = 0
-        self.time_update_check = True
-        self.font = pygame.font.Font('assets/PokemonGb-RAeo.ttf', 15)
-        self.window_x, self.window_y = self.screen.get_size()
-        self.center_x = int(self.window_x / 2)
-        self.center_y = int(self.window_y / 2)
-        self.center_pos = (self.center_x, self.center_y)
-        self.camera_group = CameraGroup()
-        self.player_group = pygame.sprite.Group()
-        self.enemy_group = pygame.sprite.Group()
-        self.menu_button_group = pygame.sprite.Group()
-        self.selection_button_group = pygame.sprite.Group()
-        self.end_button_group = pygame.sprite.Group()
-        self.experience_group = pygame.sprite.Group()
-        self.bullet_group = pygame.sprite.Group()
-
-        self.powerup_background_image = pygame.image.load("assets/assets_ui/upgrade_ui.webp")
-        self.pbi_h, self.pbi_w = self.powerup_background_image.get_size()
-        self.powerup_background_image = pygame.transform.scale(self.powerup_background_image, (self.pbi_h * 2, self.pbi_w * 2))
-
-        self.main_player = Player(self.center_pos, self.camera_group, self.enemy_group, self.experience_group, self.bullet_group)
-
-        self.enemy_spawner = Spawner(self.camera_group, self.enemy_group, self.experience_group, self.main_player)
-
-        self.selection_queue = 0
-
-        self.powerup = {}
-
-        # unified enemy animation
-        self.enemy_run = []
-        self.frame_current = 0
-        self.frame_speed = 150
-        self.frame_next = False
-        self.frame_num = 0
-        for i in range(4):
-            self.enemy_run.append(pygame.image.load(f'assets/sprite/enemy{self.enemy_spawner.enemy_type}_run{i+1}.webp'))
-    
-    def get_enemy_animation(self):
-        ''' 
-        handles enemy animation
-        args: None
-        returns: pygame.image
-            the current frame of in the enemy animation cycle 
-        '''
-        if (self.current_time - self.frame_current) > self.frame_speed:
-            self.frame_next = False
-            self.frame_num += 1
-            if self.frame_num > 3:
-                self.frame_num = 0
-
-        if self.frame_next == False:
-            self.frame_next = True
-            self.frame_current = pygame.time.get_ticks()
-
-        if self.enemy_spawner.enemy_type == 1:
-            return pygame.transform.scale(self.enemy_run[self.frame_num], (60,60))
-        else:
-            return pygame.transform.scale(self.enemy_run[self.frame_num], (60,120))
-
-    def randomize_powerup_selection(self):
-        '''
-        Randomizes the powerup choices in the selection screen when the player levels up
-        args: None
-        returns: None
-        '''
-        for selection_button in self.selection_button_group.sprites():
-            keys = list(self.powerup.keys())
-            choice = random.choice(keys)
-            selection_button.text = choice
-
-    def run_game(self):
-        '''
-        Runs the main game loop
-        args: None
-        returns: None
-        '''
-        self.player_group.add(self.main_player)
-
-        start_button = Button((self.window_x/2, self.window_y/2+200), self.menu_button_group, 'assets/assets_ui/start_button.webp', '')
-        start_background = pygame.image.load('assets/assets_ui/start_screen.webp')
-        start_background = pygame.transform.scale(start_background, (start_background.get_width()*3, start_background.get_height()*3))
-        selection_button1 = Button((self.window_x/2, self.window_y/2+120), self.selection_button_group, 'assets/assets_ui/button.webp', 'PLACEHOLDER TEXT')
-        selection_button2 = Button((self.window_x/2, self.window_y/2+20), self.selection_button_group, 'assets/assets_ui/button.webp', 'PLACEHOLDER TEXT')
-        selection_button3 = Button((self.window_x/2, self.window_y/2-80), self.selection_button_group, 'assets/assets_ui/button.webp', 'PLACEHOLDER TEXT')
-        exit_game_button = Button((self.center_x, self.center_y), self.end_button_group, 'assets/assets_ui/button.webp', 'Exit?')
-        reset_button = Button((self.center_x, self.center_y + 100), self.end_button_group, 'assets/assets_ui/button.webp', 'Retry?')
-        timer_text = self.font.render("", True, (255,255,225))
-
-        # name, level, increment, is_increment, is_percentage
-        gun_powerup = {
-            "Gun Damage":Powerup('Gun Damage', 1, "damage", True, True, self.main_player.gun),
-            "Gun Firerate":Powerup('Gun Firerate', 1, "fire_delay", False, True, self.main_player.gun),
-            "Gun Amount":Powerup('Gun Amount', 1, "count", True, False, self.main_player.gun)
-        }
-        player_powerup = {
-            "Health":Powerup('Health', 1, "max_health", True, True, self.main_player),
-            "Speed":Powerup('Speed', 1, "velocity", True, True, self.main_player),
-            "XP Gain":Powerup('XP Gain', 1, "xp_scaling", True, True, self.main_player)
-        }
-
-        # unused 
-        aura_powerup = {
-            "Aura Radius":Powerup('Aura Radius', 1, "radius", True, True, self.main_player.aura),
-            "Aura Damage":Powerup('Aura Damage', 1, "damage", True, True, self.main_player.aura),
-            "Aura Rate":Powerup('Aura Rate', 1, "fire_delay", False, True, self.main_player.aura),
-            "Aura Frequency":Powerup('Aura Frequency', 1, "count", True, False, self.main_player.aura)
-        }
-
-        self.powerup.update(gun_powerup)
-
-        self.powerup.update(player_powerup)
-
-        # self.powerup.update({"Aura":Powerup('Aura', 0, None, True, True, self.main_player.aura)}) # aura check
-
-        while True:
-            for event in pygame.event.get():
-                if (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-            self.screen.fill((0, 0, 0))
-            self.screen.blit(start_background, (self.window_x/2 - 720, self.window_y/2 - 400))
-            instruction_text1 = self.font.render('Press start to begin.', True, (255, 255, 255))
-            instruction_text2 = self.font.render('Use WASD to move.', True, (255, 255, 255))
-            instruction_text3 = self.font.render('Use Q to Quit.', True, (255, 255, 255))
-            instruction_text4 = self.font.render('Survive the Swarm.', True, (255, 255, 255))
-            self.screen.blit(instruction_text1,(100,250))
-            self.screen.blit(instruction_text2,(100,300))
-            self.screen.blit(instruction_text3,(100,350))
-            self.screen.blit(instruction_text4,(100,400))
-
-            if self.state == 'START':
-                # any buttons don't need to be drawn, update() also handles drawing
-                self.menu_button_group.update()
-                if start_button.pressed:
-                    self.state = 'RUNNING'
-            elif self.state == 'RUNNING' or self.state == 'SELECTION':
-                if self.state != 'SELECTION': # main game loop
-                    game_time_from_zero = 600000 - self.game_time
-                    self.enemy_spawner.timer_scaled_enemy_spawning(game_time_from_zero)
-
-                    # update every group that contains a sprite
-                    self.player_group.update()
-                    self.enemy_group.update(self.main_player, self.get_enemy_animation())
-                    self.bullet_group.update()
-                    self.camera_group.custom_draw(self.main_player)
-
-                    # timer
-                    self.current_time = pygame.time.get_ticks()
-                    if self.current_time - self.timer_time >= 100:
-                        self.time_update_check = True
-                        self.game_time -= 100
-                    if self.time_update_check:
-                        self.timer_time = pygame.time.get_ticks()
-                        self.time_update_check = False
-
-                    timer_text = self.font.render(f'Time: {self.game_time / 1000}', True, (0, 0, 0))
-                    self.screen.blit(timer_text,(100,100))
-
-                    # health amount
-                    health_text = self.font.render(f'Health: {int(self.main_player.health)} / {int(self.main_player.max_health)}', True, (0, 0, 0))
-                    self.screen.blit(health_text,(100,150))
-                    # firerate
-                    firerate_text = self.font.render(f'Firerate: {round(self.main_player.gun.fire_delay, 2)}ms', True, (0, 0, 0))
-                    self.screen.blit(firerate_text,(100,250))
-                    # damage
-                    damage_text = self.font.render(f'Damage: {round(self.main_player.gun.damage, 2)}', True, (0, 0, 0))
-                    self.screen.blit(damage_text,(100,300))
-                    # speed
-                    speed_text = self.font.render(f'Speed: {round(self.main_player.velocity, 2)}', True, (0, 0, 0))
-                    self.screen.blit(speed_text,(100,350))
-                    # xp
-                    xp_text = self.font.render(f'XP: {round(self.main_player.xp, 2)}/{int(self.main_player.max_xp)}', True, (0, 0, 0))
-                    self.screen.blit(xp_text,(100,200))
-                    # xp scaling
-                    xp_scaling_text = self.font.render(f'XP Scaling: {round(self.main_player.xp_scaling, 2)}x', True, (0, 0, 0))
-                    self.screen.blit(xp_scaling_text,(100,400))
-                    # gun amount
-                    gun_amount_text = self.font.render(f'Gun Amount: {self.main_player.gun.count}', True, (0, 0, 0))
-                    self.screen.blit(gun_amount_text,(100,450))
-                    
-                    if self.main_player.health <= 0:
-                        self.state = 'BAD_END'
-                        print("BAD ENDING")
-                    
-                    if self.game_time < 0:
-                        self.state = 'GOOD_END'
-
-                    if self.main_player.selection_check:
-                        self.randomize_powerup_selection()
-                        self.state = 'SELECTION'
-
-                elif self.state == 'SELECTION': # in powerup selection screen
-                    self.camera_group.custom_draw(self.main_player) # draw background before drawing buttons
-                    self.screen.blit(self.powerup_background_image, self.powerup_background_image.get_rect(center = self.center_pos))
-                    self.selection_button_group.update() # updates and draws buttons
-
-                    for selection_button in self.selection_button_group.sprites(): # powerup selection
-                        if selection_button.pressed == True:
-                            # giving powerup
-                            current_powerup = self.powerup[selection_button.text]
-                            current_powerup_check = current_powerup.give_powerup()
-                            if current_powerup_check == "Aura":
-                                del self.powerup['Aura']
-                                self.powerup.update(aura_powerup)
-                                print('aura removed & powerups added')
-
-                            # handles overflow xp
-                            if self.main_player.selection_queue > 0:
-                                self.main_player.selection_queue -= 1
-                                self.randomize_powerup_selection()
-                                self.state = 'SELECTION'
-                            else:
-                                self.state = 'RUNNING'
-
-            elif self.state == 'BAD_END':
-                self.camera_group.custom_draw(self.main_player)
-                bad_end_text = self.font.render(f'You lost! You reached level {self.main_player.level}', True, (0, 0, 0))
-                self.screen.blit(bad_end_text, (self.center_x - 200, self.center_y - 100))
-                self.end_button_group.update()
-                if reset_button.pressed == True:
-                    self.game_time = 600000
-                    enemies = self.enemy_group.sprites()
-                    for enemy in enemies:
-                        enemy.kill()
-                    self.player_group.remove(self.main_player)
-                    self.main_player.kill()
-                    self.main_player = Player(self.center_pos, self.camera_group, self.enemy_group, self.experience_group, self.bullet_group)
-                    self.player_group.add(self.main_player)
-                    self.state = 'START'
-
-                if exit_game_button.pressed == True:
-                    pygame.quit()
-
-            elif self.state == 'GOOD_END':
-                self.camera_group.custom_draw(self.main_player)
-                good_end_text = self.font.render(f'You won! You reached level {self.main_player.level}', True, (0, 0, 0))
-                self.screen.blit(good_end_text, (self.center_x - 200, self.center_y - 100))
-                self.end_button_group.update()
-
-                if reset_button.pressed == True:
-                    self.game_time = 600000
-                    enemies = self.enemy_group.sprites()
-                    for enemy in enemies:
-                        enemy.kill()
-                    self.player_group.remove(self.main_player)
-                    self.main_player.kill()
-                    self.main_player = Player(self.center_pos, self.camera_group, self.enemy_group, self.experience_group, self.bullet_group)
-                    self.player_group.add(self.main_player)
-                    self.state = 'START'
-
-                if exit_game_button.pressed == True:
-                    pygame.quit()
-
-            pygame.display.update()
-
-            # limit fps to 60
-            self.clock.tick(60)
-
-        pygame.quit()
-
-def initialize_pygame():
-    '''
-    Initializes pygame, does basic setup, and sets the window title of the game 
-    args: None
-    returns: None
-    '''
-    GAME_TITLE = "Swarm Computing"
-    pygame.init()
-    pygame.font.init()
-    pygame.event.pump() # keeps window responsive
-    pygame.display.set_caption(GAME_TITLE)
+import requests
+from src import openlibrarysubjectsearch
+from src import openlibrarysubjectbooks
+from src import freemoviedatabase
 
 def main():
-    initialize_pygame()
-    game = Game()
-    game.run_game()
+    subject = ''
+    subject_results = {}
+    subject_list = []
+    num_found_subject = 0
+
+    print("Welcome to the book / movie matcher!")
+    print("Please enter a book subject to begin. (e.g. Love, Winter, Fantasy)")
+
+    while num_found_subject == 0:
+        subject = input(': ')
+        subjects = openlibrarysubjectsearch.OpenLibrarySubjectSearch(subject)
+        subject_results = subjects.get()
+        subject_list = subject_results['docs']
+
+        num_found_subject = subject_results['numFound']
+        if num_found_subject == 0:
+            print("Please try again.")
+        else:
+            print(f'Total results: {num_found_subject} (Can show a maximum of 99)')
+
+    user_subject_selection = None
+    current_index_subject = 0
+    search_index_subject = 0
+    while (type(user_subject_selection) is not int):
+        print('Enter number to select choice, enter "n" to see next 10 results, enter "b" to see previous 10 results, or "q" to quit.')
+        if current_index_subject + 10 <= num_found_subject:
+            search_index_subject = current_index_subject + 10
+        else:
+            search_index_subject = len(subject_list)
+
+        for i in range(current_index_subject, search_index_subject):
+            print(f'{i}: {subject_list[i]['name']}')
+
+        user_subject_selection = input(': ')
+
+        if user_subject_selection == 'q':
+            sys.exit()
+        elif user_subject_selection == 'n':
+            if current_index_subject + 10 >= 100 or current_index_subject + 10 >= num_found_subject:
+                print('You are on the last page.')
+            else:
+                current_index_subject += 10
+        elif user_subject_selection == 'b':
+            if current_index_subject - 10 < 0:
+                print('You are on the first page.')
+            else:
+                current_index_subject -= 10
+        elif user_subject_selection.isdigit() and int(user_subject_selection) < len(subject_list):
+            user_subject_selection = int(user_subject_selection)
+        else:
+            print('Please enter a valid choice.')
+
+    subject_choice = subject_list[user_subject_selection]['name'].lower()
+    print('Your choice: ', subject_choice)
+
+    num_found_subject = 0
+
+    books = openlibrarysubjectbooks.OpenLibrarySubjectBooks(subject_choice)
+    book_results = books.get()
+    num_count_books = book_results['work_count']
+    book_list = book_results['works']
+
+    user_book_selection = None
+    current_index_book = 0
+    search_index_book = 0
+    while (type(user_book_selection) is not int):
+        print('Enter number to select choice, enter "n" to see next 10 results, enter "b" to see previous 10 results, or "q" to quit.')
+        if current_index_book + 10 <= num_found_subject:
+            search_index_book = current_index_book + 10
+        else:
+            search_index_book = len(book_list)
+
+        for i in range(current_index_book, search_index_book):
+            title = book_list[i]['title']
+            author_data = book_list[i]['authors']
+            authors = []
+            for author in author_data:
+                authors.append(author['name'])
+            print(f'{i}: {book_list[i]['title']}')
+            print(f'    Author(s):{"".join([f'[{author}] ' for author in authors])}')
+
+        user_book_selection = input(': ').lower()
+
+        if user_book_selection == 'q':
+            sys.exit()
+        elif user_book_selection == 'n':
+            if current_index_book + 10 >= 12 or current_index_book + 10 >= num_count_books:
+                print('You are on the last page.')
+            else:
+                current_index_book += 10
+        elif user_book_selection == 'b':
+            if current_index_book - 10 < 0:
+                print('You are on the first page.')
+            else:
+                current_index_book -= 10
+        elif user_book_selection.isdigit() and int(user_book_selection) <= 11:
+            user_book_selection = int(user_book_selection)
+        else:
+            print('Please enter a valid choice.')
+
+    book_title = book_list[i]['title']
+    book_author_data = book_list[i]['authors']
+    book_authors = []
+    for book_author in book_author_data:
+        book_authors.append(book_author['name'])
+    book_choice = book_list[user_book_selection]['title']
+
+    print('Your book: ', book_choice)
+    print(f'    Author(s):{"".join([f'[{book_author}] ' for book_author in book_authors])}')
+
+    movie_search_user_query = ''
+    movie_search_query_selection = ''
+    print("Press 1 to search for a movie using your book title as a query.")
+    print("Press 2 to search for a movie using your subject as a query.")
+    print("Press q to quit.")
+    while movie_search_user_query != 'q':
+        movie_search_user_query = input(': ').lower()
+        if movie_search_user_query == '1':
+            movie_search_query_selection = book_title
+            break
+        elif movie_search_user_query == '2':
+            movie_search_query_selection = subject_choice
+            break
+        elif movie_search_user_query == 'q':
+            sys.exit()
+        else:
+            print("Please enter a valid choice.")
+
+    free_movie_api = freemoviedatabase.FreeMovieDatabaseSearch(movie_search_query_selection)
+    movies = free_movie_api.get()
+    movies = movies['description']
+
+    if movies:
+        if len(movies) < 10:
+            for movie in movies:
+                movie_title = movie.get('#TITLE')
+                movie_year = movie.get('#YEAR')
+                imdb_link = movie.get('#IMDB_URL')
+                print(f'Title: {movie_title}')
+                print(f'    Year Released: {movie_year}')
+                print(f'    IMDB Link: {imdb_link}')
+        else:
+            for i in range(10):
+                movie_title = movies[i].get('#TITLE')
+                movie_year = movies[i].get('#YEAR')
+                imdb_link = movies[i].get('#IMDB_URL')
+                print(f'Title: {movie_title}')
+                print(f'    Year Released: {movie_year}')
+                print(f'    IMDB Link: {imdb_link}')
+    else:
+        print("No movies found for your search query!")
 
 if __name__ == '__main__':
     main()
